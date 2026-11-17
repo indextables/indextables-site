@@ -93,7 +93,7 @@ This follows the tutorials / how-to / explanation / reference split that most we
 
 1. **One sentence and one example.** "Full-text search on lakehouse tables, inside your query engine. No search cluster." The sub-line names Apache Spark and Apache DataFusion. Beside it, a tabbed example (Spark SQL, PySpark, Scala, DataFusion) that searches a table.
 2. **Choose your path.** Six cards by role, each going to a different starting page.
-3. **How it works in three steps.** Write an index beside your data; commit it in a transaction log; executors search it directly from object storage.
+3. **How it works in three steps.** Write a table, or index one you already have; commit it in a transaction log; the engine searches it directly from object storage. Below the steps, two equal cards name the two kinds of table: a standalone table, where IndexTables stores the data and the index, and a companion table, an index over an existing Delta, Iceberg or Parquet table.
 4. **Watch the talk.** The 36-minute conference presentation (section 5.5), with a short chapter list beside it.
 5. **What you can do today.** The availability matrix, generated, with planned items marked as planned.
 6. **Documentation you can check.** A short explanation that every reference statement cites a numbered requirement, with a live spec chip to click.
@@ -260,6 +260,15 @@ The product is one engine-neutral core with two bindings, and the site presents 
 The engine badge is generated, not typed: a page that cites only `SPARK-*` specs is badged Spark, one that cites only `DF-AD-*` is badged DataFusion, and one that cites only `CORE-*` or both is badged for both.
 
 The navigation is built so that a third binding is one more entry in the switch, the matrix and the Guides list, with no change to Learn or Concepts.
+
+### 5.8 Standalone and companion tables
+
+IndexTables has two kinds of table, and the site gives them equal weight. A standalone table stores the data and the index. A companion table is an index over an existing Delta, Iceberg or Parquet table, and reads row values from that table's files.
+
+- The home page, Why and Learn describe both wherever they describe what the product is. No general statement says the index sits "next to your data", which is true only of companions.
+- Each kind has its own entry point: the quickstart creates a standalone table, and a second short tutorial adds a companion to an existing table.
+- "Standard tables and companions: which do I need?" in Learn is the decision page, and the home page cards link to it.
+- Guides state which kind they apply to when the behaviour differs.
 
 ## 6. Usability rules
 

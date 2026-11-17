@@ -70,6 +70,14 @@ section.band{padding:60px 0;border-bottom:1px solid var(--rule)}
 .paths{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--rule);margin-top:26px;background:var(--rule)}
 .paths a{padding:20px 18px 22px;background:var(--card);text-decoration:none;color:var(--ink);display:block}
 .paths a:hover{background:var(--paper2)}
+.modes-h{font:600 20px var(--serif);margin:44px 0 0}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:14px}
+.modes>div{background:var(--card);padding:22px 22px 24px}
+.modes .who{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.modes h3{font:600 19px var(--serif);margin:6px 0 6px}
+.modes p{margin:0 0 10px;color:var(--muted);font-size:14.5px}
+.modes .go{color:var(--accent);font-weight:600;font-size:14px;text-decoration:none}
+@media(max-width:760px){.modes{grid-template-columns:1fr}}
 .paths .who{font:500 11.5px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .paths h3{margin:.45em 0 .35em;font-size:1.08rem} .paths p{font-size:14px;color:var(--muted);margin:0 0 .8em}
 .paths .go{font-size:13.5px;font-weight:600;color:var(--accent)}
@@ -179,7 +187,7 @@ td.key code{font-weight:500;border:0;background:none;padding:0}
     <div class="inner">
       <div class="eyebrow">Open source · Spark · DataFusion · Rust core</div>
       <h1>Full-text <mark>search</mark> on lakehouse tables, inside your query engine.</h1>
-      <p class="lede">IndexTables writes search indexes next to your data in object storage. Apache Spark and Apache DataFusion query them directly, so there is no search cluster to run, feed or pay for.</p>
+      <p class="lede">Store data in an IndexTables table, or add an index to the Delta, Iceberg or Parquet tables you already have. Either way it lives in your object storage, and Apache Spark and Apache DataFusion query it directly. There is no search cluster to run, feed or pay for.</p>
       <div class="cta"><a class="btn p" href="#start">Get started in 5 minutes</a><a class="btn" href="#learn">Explain it to me simply</a></div>
     </div>
     <div class="code" data-tabs>
@@ -240,9 +248,14 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
   <section class="band"><div class="wrap">
     <h2>How it works</h2>
     <div class="steps">
-      <div><div class="n">1</div><h3>Write an index beside your data</h3><p>A Spark write produces immutable index files, called splits, in your own bucket.</p></div>
+      <div><div class="n">1</div><h3>Write a table, or index one</h3><p>Either way, the result is immutable index files, called splits, in your own bucket.</p></div>
       <div><div class="n">2</div><h3>Commit it in a transaction log</h3><p>Each write is one atomic commit. Readers always see a consistent snapshot.</p></div>
       <div><div class="n">3</div><h3>Search from your engine</h3><p>Spark executors, or a DataFusion process, open only the splits and bytes a query needs. No server sits in between.</p></div>
+    </div>
+    <h3 class="modes-h">Two kinds of table, one way to query</h3>
+    <div class="modes">
+      <div><div class="who">Standalone table</div><h3>The index is the table</h3><p>Write rows to IndexTables and it stores both the data and the index. Use it when search is the main job of the data: logs, events, documents.</p><a class="go" href="#start">Create a table →</a></div>
+      <div><div class="who">Companion table</div><h3>An index over a table you already have</h3><p>Point IndexTables at a Delta, Iceberg or Parquet table. It builds the index and keeps reading row values from your files, so nothing is copied.</p><a class="go" href="#guide">Add a companion →</a></div>
     </div>
   </div></section>
 
