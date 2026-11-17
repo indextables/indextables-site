@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IndexTables — design mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#FAF7F0; --paper2:#F3EEE2; --ink:#161B22; --muted:#5A6472; --rule:#E4DED0;
+  --accent:#C23A1E; --hl:#FFD84D; --hl-ink:#161B22; --code-bg:#12161C; --code-ink:#E8E4DA;
+  --ok:#2F7D4F; --plan:#8A5800; --defer:#5B6573; --card:#FFFDF8;
+  --serif:"Fraunces","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+[data-theme=dark]{
+  --paper:#12161C; --paper2:#181D25; --ink:#E8E4DA; --muted:#9AA3AF; --rule:#2A313B;
+  --accent:#FF8A6B; --hl:#5A4A12; --hl-ink:#FFE9A6; --code-bg:#0C0F14; --code-ink:#E8E4DA;
+  --ok:#6FCF97; --plan:#F0C24B; --defer:#9AA3AF; --card:#181D25;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.15;letter-spacing:-.01em;margin:0 0 .5em}
+h1{font-size:clamp(2.2rem,4.6vw,3.6rem)} h2{font-size:clamp(1.5rem,2.6vw,2.1rem)} h3{font-size:1.2rem}
+p{margin:0 0 1em} code{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:var(--paper2);border:1px solid var(--rule);padding:.05em .35em;border-radius:2px}
+mark{background:linear-gradient(transparent 12%,var(--hl) 12%,var(--hl) 88%,transparent 88%);color:var(--hl-ink);padding:0 .12em;border-radius:1px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.view{display:none} .view.on{display:block}
+/* mock banner */
+.mock{background:var(--ink);color:var(--paper);font-size:12.5px;text-align:center;padding:5px 12px}
+/* nav */
+header.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:58px}
+.brand{display:flex;align-items:center;gap:9px;font-family:var(--serif);font-weight:600;font-size:1.22rem;color:var(--ink);text-decoration:none}
+.nav nav{display:flex;gap:2px;flex:1;overflow-x:auto}
+.nav nav a{color:var(--ink);text-decoration:none;font-size:14.5px;font-weight:500;padding:6px 10px;border-bottom:2px solid transparent;white-space:nowrap}
+.nav nav a:hover{color:var(--accent)} .nav nav a.on{border-color:var(--accent);color:var(--accent)}
+.tools{display:flex;gap:8px;align-items:center}
+.btn-s{font:500 13px var(--sans);color:var(--muted);background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:6px 10px;cursor:pointer;white-space:nowrap}
+.btn-s:hover{color:var(--ink);border-color:var(--muted)} kbd{font:11px var(--mono);border:1px solid var(--rule);padding:0 4px;border-radius:2px;margin-left:6px}
+/* buttons */
+.btn{display:inline-block;font-weight:600;font-size:15px;padding:11px 18px;border-radius:2px;text-decoration:none;border:1.5px solid var(--ink);color:var(--ink)}
+.btn.p{background:var(--accent);border-color:var(--accent);color:#fff} [data-theme=dark] .btn.p{color:#12161C}
+.btn:hover{transform:translateY(-1px)}
+/* hero */
+.hero{padding:64px 0 56px;border-bottom:1px solid var(--rule);background-image:linear-gradient(var(--rule) 1px,transparent 1px),linear-gradient(90deg,var(--rule) 1px,transparent 1px);background-size:48px 48px;background-position:-1px -1px}
+.hero .grid{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:center}
+.hero .lede{font-size:1.16rem;color:var(--muted);max-width:34em}
+.hero .inner{background:var(--paper);padding:6px 0}
+.eyebrow{font:500 12.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+/* code */
+.code{background:var(--code-bg);color:var(--code-ink);border-radius:3px;border:1px solid #2A313B;overflow:hidden;font-family:var(--mono);font-size:13.2px}
+.tabs{display:flex;border-bottom:1px solid #2A313B;align-items:center}
+.tabs button{font:500 12.5px var(--mono);color:#9AA3AF;background:none;border:0;padding:9px 14px;cursor:pointer;border-bottom:2px solid transparent}
+.tabs button.on{color:#fff;border-color:#FFD84D}
+.tabs .copy{margin-left:auto;color:#9AA3AF}
+.code pre{margin:0;padding:16px 18px;overflow-x:auto;line-height:1.65}
+.code pre[hidden]{display:none}
+.k{color:#FF8A6B}.s{color:#B8E0A8}.c{color:#6B7684}.hit{background:#FFD84D;color:#161B22;padding:0 2px;border-radius:1px}
+.out{border-top:1px dashed #2A313B;color:#9AA3AF}
+/* sections */
+section.band{padding:60px 0;border-bottom:1px solid var(--rule)}
+.sub{color:var(--muted);max-width:44em;font-size:1.05rem}
+.paths{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--rule);margin-top:26px;background:var(--card)}
+.paths a{padding:20px 18px 22px;border-right:1px solid var(--rule);text-decoration:none;color:var(--ink);display:block}
+.paths a:last-child{border-right:0} .paths a:hover{background:var(--paper2)}
+.paths .who{font:500 11.5px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.paths h3{margin:.45em 0 .35em;font-size:1.08rem} .paths p{font-size:14px;color:var(--muted);margin:0 0 .8em}
+.paths .go{font-size:13.5px;font-weight:600;color:var(--accent)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:28px;border-top:2px solid var(--ink)}
+.steps div{padding:20px 22px 0 0} .steps .n{font:600 2.2rem var(--serif);color:var(--accent)}
+.steps p{color:var(--muted);font-size:15px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--ink)}
+.badge{display:inline-flex;align-items:center;gap:5px;font:600 11.5px var(--mono);padding:2px 7px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.b-ok{color:var(--ok)}.b-plan{color:var(--plan)}.b-def{color:var(--defer)}
+.spec{display:inline-block;font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--rule);background:var(--card);padding:1px 6px;border-radius:2px;cursor:pointer;position:relative;vertical-align:1px}
+.spec:hover,.spec:focus{border-color:var(--accent);color:var(--accent);outline:0}
+.spec .pop{display:none;position:absolute;left:0;top:calc(100% + 6px);width:min(420px,80vw);background:var(--card);color:var(--ink);border:1px solid var(--ink);padding:12px 14px;font:13.5px/1.5 var(--sans);z-index:30;box-shadow:4px 4px 0 var(--rule);text-align:left;white-space:normal}
+.spec:hover .pop,.spec:focus .pop,.spec:focus-within .pop{display:block}
+.pop b{font:600 12px var(--mono);display:block;margin-bottom:4px}.pop small{display:block;margin-top:8px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+.proof{border:1px solid var(--ink);background:var(--card);padding:22px 24px;box-shadow:6px 6px 0 var(--rule)}
+.posts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--rule);margin-top:22px}
+.posts a{padding:18px 20px 18px 0;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--rule)}
+.posts time{font:12px var(--mono);color:var(--muted)} .posts h3{margin:.3em 0;font-size:1.1rem} .posts a:hover h3{color:var(--accent)}
+footer{padding:36px 0 60px;color:var(--muted);font-size:14px}
+footer .cols{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:24px}
+footer h4{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--ink);margin:0 0 8px}
+footer a{display:block;color:var(--muted);text-decoration:none;padding:2px 0} footer a:hover{color:var(--accent)}
+/* docs layout */
+.docs{display:grid;grid-template-columns:232px minmax(0,1fr) 236px;gap:40px;padding-top:30px;padding-bottom:60px}
+.side{font-size:14px;position:sticky;top:82px;align-self:start;max-height:calc(100vh - 100px);overflow:auto}
+.side h4{font:600 11.5px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 6px}
+.side h4:first-child{margin-top:0}
+.side a{display:block;padding:4px 10px;color:var(--ink);text-decoration:none;border-left:2px solid var(--rule)}
+.side a:hover{color:var(--accent)} .side a.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.crumb{font:12.5px var(--mono);color:var(--muted);margin-bottom:14px}
+.forwho{border-left:3px solid var(--hl);background:var(--paper2);padding:12px 16px;font-size:14.5px;margin:0 0 26px}
+[data-theme=dark] .forwho{border-color:var(--plan)}
+.forwho b{font:600 11.5px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-right:6px}
+article h1{font-size:2.4rem} article h2{margin-top:1.7em;font-size:1.5rem} article p,article li{max-width:44em}
+article .code{margin:14px 0 20px}
+.note{border:1px solid var(--rule);border-left:3px solid var(--plan);padding:12px 16px;font-size:14.5px;margin:18px 0;background:var(--card)}
+.cite{border:1px solid var(--rule);background:var(--card);padding:14px;font-size:13px;margin-top:22px}
+.cite h4{margin-top:0}.cite .spec{margin:2px 2px 2px 0}.cite p{color:var(--muted);margin:.7em 0 0;font-size:12.5px}.cite p a{display:inline;border:0;padding:0;color:var(--accent)}
+.next{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:38px}
+.next a{border:1px solid var(--rule);padding:14px 16px;text-decoration:none;color:var(--ink);background:var(--card)}
+.next a:hover{border-color:var(--accent)} .next small{display:block;color:var(--muted);font:12px var(--mono)}
+.stepn{counter-reset:s;list-style:none;padding:0}
+.stepn>li{counter-increment:s;position:relative;padding:0 0 8px 46px;border-left:1px solid var(--rule);margin-left:15px}
+.stepn>li::before{content:counter(s);position:absolute;left:-16px;top:-2px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);font:600 14px/30px var(--mono);text-align:center}
+.stepn h3{margin-bottom:.3em}
+/* learn */
+.learn{max-width:760px;margin:0 auto;padding:54px 24px 70px;font-size:1.13rem;line-height:1.7}
+.learn h1{margin-bottom:.3em}.learn .sub{font-size:1.2rem;margin-bottom:1.6em}
+.fig{border:1px solid var(--rule);background:var(--card);padding:20px;margin:26px 0;font:13px var(--mono)}
+.fig .row{display:grid;grid-template-columns:120px 1fr;border-bottom:1px solid var(--rule);padding:7px 0}.fig .row:last-child{border:0}
+.fig figcaption,.figcap{font:13px var(--sans);color:var(--muted);margin-top:12px}
+.tip{border-bottom:1px dotted var(--muted);cursor:help}
+/* reference */
+.filter{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0;position:sticky;top:58px;background:var(--paper);padding:10px 0;z-index:5;border-bottom:1px solid var(--rule)}
+.filter input{flex:1;min-width:220px;font:14px var(--mono);padding:9px 12px;border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:2px}
+.chip{font:500 12.5px var(--mono);border:1px solid var(--rule);background:var(--card);color:var(--ink);padding:7px 10px;border-radius:2px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+td.key code{font-weight:500;border:0;background:none;padding:0}
+/* search */
+.ov{position:fixed;inset:0;background:rgba(18,22,28,.55);z-index:50;display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
+.ov.on{display:flex}
+.sbox{width:min(640px,92vw);background:var(--paper);border:1px solid var(--ink);box-shadow:8px 8px 0 rgba(0,0,0,.25)}
+.sbox input{width:100%;font:17px var(--sans);padding:16px 18px;border:0;border-bottom:1px solid var(--rule);background:transparent;color:var(--ink);outline:0}
+.sbox a{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:10px 18px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--rule);font-size:14.5px}
+.sbox a:hover{background:var(--paper2)} .sbox a span:first-child{font:11.5px var(--mono);color:var(--muted);text-transform:uppercase;padding-top:3px}
+.banner{border:1px solid var(--plan);color:var(--ink);background:var(--card);padding:10px 14px;font-size:14px;margin:14px 0 22px}
+@media(max-width:980px){.hero .grid,.two{grid-template-columns:1fr}.paths{grid-template-columns:1fr 1fr}.paths a{border-bottom:1px solid var(--rule)}.steps,.posts{grid-template-columns:1fr}.docs{grid-template-columns:1fr}.side{position:static;max-height:none}.side.r{display:none}footer .cols{grid-template-columns:1fr 1fr}.tools .lbl{display:none}}
+</style>
+</head>
+<body>
+<div class="mock">Design mockup for review. Layout, colour and type are the proposal; wording and figures are illustrative.</div>
+<header class="nav"><div class="wrap">
+  <a class="brand" href="#home">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="1" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"/><rect x="9" y="9" width="8" height="8" fill="#FFD84D"/><path d="M9 1v24M17 1v24M1 9h24M1 17h24" stroke="currentColor" stroke-width="1.5"/></svg>
+    IndexTables</a>
+  <nav>
+    <a href="#why" data-v="why">Why</a><a href="#learn" data-v="learn">Learn</a><a href="#start" data-v="start">Get started</a>
+    <a href="#guide" data-v="guide">Guides</a><a href="#guide" data-v="x">Concepts</a><a href="#ref" data-v="ref">Reference</a><a href="#blog" data-v="blog">Blog</a>
+  </nav>
+  <div class="tools">
+    <button class="btn-s" id="sbtn"><span class="lbl">Search</span><kbd>/</kbd></button>
+    <button class="btn-s" title="Docs version"><span class="lbl">next </span>▾</button>
+    <button class="btn-s" id="theme" aria-label="Toggle theme">◐</button>
+  </div>
+</div></header>
+
+<!-- HOME -->
+<main class="view" id="v-home">
+  <div class="hero"><div class="wrap grid">
+    <div class="inner">
+      <div class="eyebrow">Open source · Apache Spark · Rust core</div>
+      <h1>Full-text <mark>search</mark> on lakehouse tables, inside Spark.</h1>
+      <p class="lede">IndexTables writes search indexes next to your data in object storage. Spark executors query them directly, so there is no search cluster to run, feed or pay for.</p>
+      <div class="cta"><a class="btn p" href="#start">Get started in 5 minutes</a><a class="btn" href="#learn">Explain it to me simply</a></div>
+    </div>
+    <div class="code" data-tabs>
+      <div class="tabs"><button class="on" data-l="sql">SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button class="copy">copy</button></div>
+<pre data-l="sql"><span class="c">-- register an existing table, then search it</span>
+<span class="k">CREATE TABLE</span> docs <span class="k">USING</span> indextables
+<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/docs'</span>;
+
+<span class="k">SELECT</span> id, title <span class="k">FROM</span> docs
+<span class="k">WHERE</span> title <span class="k">indexquery</span> <span class="s">'quick fox'</span>
+  <span class="k">AND</span> region = <span class="s">'us'</span>;</pre>
+<pre data-l="py" hidden>df.write.format(<span class="s">"indextables"</span>) \
+  .option(<span class="s">"spark.indextables.indexing.typemap.title"</span>, <span class="s">"text"</span>) \
+  .partitionBy(<span class="s">"region"</span>).mode(<span class="s">"append"</span>) \
+  .save(<span class="s">"s3://my-bucket/docs"</span>)
+
+docs = spark.read.format(<span class="s">"indextables"</span>).load(<span class="s">"s3://my-bucket/docs"</span>)
+docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</span>) \
+    .select(<span class="s">"id"</span>, <span class="s">"title"</span>).show()</pre>
+<pre data-l="scala" hidden>df.write.format(<span class="s">"indextables"</span>)
+  .option(<span class="s">"spark.indextables.indexing.typemap.title"</span>, <span class="s">"text"</span>)
+  .partitionBy(<span class="s">"region"</span>).mode(<span class="s">"append"</span>)
+  .save(<span class="s">"s3://my-bucket/docs"</span>)
+
+<span class="k">val</span> docs = spark.read.format(<span class="s">"indextables"</span>).load(<span class="s">"s3://my-bucket/docs"</span>)
+docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</span>)
+    .select(<span class="s">"id"</span>, <span class="s">"title"</span>).show()</pre>
+<pre class="out">+---+---------------------+
+| id| title               |
++---+---------------------+
+|  1| The <span class="hit">quick</span> brown <span class="hit">fox</span> |
+|  2| <span class="hit">quick</span> <span class="hit">fox</span> jumps     |
++---+---------------------+</pre>
+    </div>
+  </div></div>
+
+  <section class="band"><div class="wrap">
+    <h2>Start where <mark>you</mark> are</h2>
+    <p class="sub">Five ways in. Each one skips what you do not need.</p>
+    <div class="paths">
+      <a href="#why"><div class="who">Evaluating</div><h3>Should we use this?</h3><p>What it is, where it fits, and when it is the wrong tool.</p><span class="go">Why IndexTables →</span></a>
+      <a href="#learn"><div class="who">New to search</div><h3>Explain it simply</h3><p>Indexes, splits and logs in plain language, with pictures.</p><span class="go">Learn →</span></a>
+      <a href="#start"><div class="who">Data engineer</div><h3>Build a table</h3><p>Write, partition, merge and maintain searchable tables.</p><span class="go">Quickstart →</span></a>
+      <a href="#guide"><div class="who">Analyst · developer</div><h3>Search my data</h3><p>IndexQuery, filters and aggregates from SQL or DataFrames.</p><span class="go">Query guides →</span></a>
+      <a href="#ref"><div class="who">Operator</div><h3>Run it safely</h3><p>Storage, credentials, caching, observability, every setting.</p><span class="go">Operate →</span></a>
+    </div>
+  </div></section>
+
+  <section class="band"><div class="wrap">
+    <h2>How it works</h2>
+    <div class="steps">
+      <div><div class="n">1</div><h3>Write an index beside your data</h3><p>A Spark write produces immutable index files, called splits, in your own bucket.</p></div>
+      <div><div class="n">2</div><h3>Commit it in a transaction log</h3><p>Each write is one atomic commit. Readers always see a consistent snapshot.</p></div>
+      <div><div class="n">3</div><h3>Search from the executors</h3><p>Executors open only the splits and bytes a query needs. No server sits in between.</p></div>
+    </div>
+  </div></section>
+
+  <section class="band"><div class="wrap">
+    <h2>What you can do <mark>today</mark></h2>
+    <p class="sub">This table is generated from the project's requirement status, not written by hand.</p>
+    <table style="margin-top:18px">
+      <tr><th>Area</th><th>Capability</th><th>Status</th></tr>
+      <tr><td>Tables</td><td>Create, append, overwrite, partition; exact and fast read modes</td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Search</td><td>IndexQuery, filter pushdown, exact aggregate pushdown</td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Streaming</td><td>Structured Streaming source</td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Companions</td><td>Index an existing Parquet directory without copying it</td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Companions</td><td>Delta and Iceberg build and incremental sync</td><td><span class="badge b-plan">Planned</span></td></tr>
+      <tr><td>Storage</td><td>Azure and GCS writes</td><td><span class="badge b-def">Gated</span></td></tr>
+    </table>
+    <p style="margin-top:14px"><a href="#ref">Full feature status →</a></p>
+  </div></section>
+
+  <section class="band"><div class="wrap two">
+    <div>
+      <h2>Documentation you can <mark>check</mark></h2>
+      <p class="sub">IndexTables is built from numbered requirements. These docs cite them. Wherever you see a tag like the one on the right, the sentence beside it traces to a requirement that has a test behind it.</p>
+      <p><a href="#guide">How this project is built →</a></p>
+    </div>
+    <div class="proof">
+      <p style="margin-bottom:.6em">A read that names no table root fails with <code>Path is required…</code>
+      <span class="spec" tabindex="0">SPARK-RD-SRC-004<span class="pop"><b>SPARK-RD-SRC-004 · implemented</b>If an IndexTables read names no table root, then the binding shall fail with the error <code>Path is required. Use load("path") or .option("path", "value").load()</code>.<small>spark/read · verified at upstream e947724</small></span></span></p>
+      <p style="margin:0;color:var(--muted);font-size:14px">Hover or focus the tag.</p>
+    </div>
+  </div></section>
+
+  <section class="band"><div class="wrap">
+    <h2>From the blog</h2>
+    <div class="posts">
+      <a href="#blog"><time>2026-04-05</time><h3>IndexTables 0.5.5</h3><span class="sub" style="font-size:14px">Native Rust transaction log, DataSource short name, FFI profiler.</span></a>
+      <a href="#blog"><time>2026-04-04</time><h3>The Data Layer Problem No One Is Talking About</h3></a>
+      <a href="#blog"><time>2026-02-16</time><h3>Search Is an Index, Not a Copy</h3><span class="sub" style="font-size:14px">Introducing companion mode.</span></a>
+    </div>
+  </div></section>
+</main>
+
+<!-- WHY -->
+<main class="view" id="v-why"><div class="learn">
+  <div class="eyebrow">Why IndexTables</div>
+  <h1>Search without a second <mark>system</mark></h1>
+  <p class="sub">For people deciding whether this belongs in their platform.</p>
+  <p>Most teams that need text search over large data run a search cluster beside their lakehouse and copy data into it. That means two copies, two security models and a pipeline between them.</p>
+  <p>IndexTables keeps the index in your object storage, in an open table layout, and lets the engine you already run do the searching.</p>
+  <table><tr><th>You want</th><th>Good fit?</th></tr>
+  <tr><td>Keyword and phrase search over logs, events or documents already in a lakehouse</td><td><span class="badge b-ok">Yes</span></td></tr>
+  <tr><td>Search combined with SQL joins and aggregates in one query</td><td><span class="badge b-ok">Yes</span></td></tr>
+  <tr><td>An always-on search API serving end users at millisecond latency</td><td><span class="badge b-def">Not the goal</span></td></tr>
+  <tr><td>Tables on HDFS</td><td><span class="badge b-def">Not supported</span></td></tr></table>
+  <div class="next"><a href="#learn"><small>Next</small>IndexTables in plain English</a><a href="#start"><small>Or</small>Try the quickstart</a></div>
+</div></main>
+
+<!-- LEARN -->
+<main class="view" id="v-learn"><div class="learn">
+  <div class="eyebrow">Learn · 6 minute read · no search background needed</div>
+  <h1>IndexTables in plain <mark>English</mark></h1>
+  <p class="sub">What an index is, where IndexTables keeps it, and why that saves you a cluster.</p>
+  <p>Imagine a thousand-page book with no index at the back. To find every mention of "invoice" you read every page. That is what a query engine does when it scans files for a word.</p>
+  <p>An <span class="tip" title="Glossary: a lookup from each word to the rows that contain it">inverted index</span> is the index at the back of the book: for each word, the list of places it appears.</p>
+  <figure class="fig" style="margin-left:0;margin-right:0">
+    <div class="row"><span>fox</span><span>→ row 1, row 2</span></div>
+    <div class="row"><span>quick</span><span>→ row 1, row 2</span></div>
+    <div class="row"><span>lazy</span><span>→ row 3</span></div>
+    <figcaption>Searching for <mark>quick fox</mark> means reading two short lists and keeping the rows on both: 1 and 2.</figcaption>
+  </figure>
+  <h2>Where the index lives</h2>
+  <p>A search server keeps its index on its own disks. IndexTables keeps it as ordinary files in the same bucket as your tables. Each file is called a <span class="tip" title="Glossary: an immutable index file covering a set of rows">split</span>, and a small log records which splits make up the table right now.</p>
+  <h2>Who does the searching</h2>
+  <p>Spark does. Each executor fetches just the parts of the splits a query needs. When the query ends, nothing is left running.</p>
+  <div class="next"><a href="#start"><small>Ready to try it</small>Quickstart: local Spark in five minutes</a><a href="#guide"><small>Keep learning</small>Exact answers and fast answers</a></div>
+</div></main>
+
+<!-- START -->
+<main class="view" id="v-start"><div class="wrap docs">
+  <aside class="side"><h4>Get started</h4><a class="on" href="#start">Quickstart</a><a href="#start">Install</a><a href="#start">Your first table</a><a href="#start">Your first searches</a><a href="#start">Run it on your platform</a><a href="#start">Coming from 0.5.x</a></aside>
+  <article>
+    <div class="crumb">Get started / Quickstart</div>
+    <h1>Quickstart</h1>
+    <div class="forwho"><b>For</b>anyone with Spark 3.5 or 4.x and JDK 17. <b style="margin-left:10px">You will</b>write a small table and run a text search, on your laptop.</div>
+    <ol class="stepn">
+      <li><h3>Start Spark with the extension</h3>
+        <div class="code"><div class="tabs"><button class="on">Scala</button><button>PySpark</button><button class="copy">copy</button></div><pre><span class="k">val</span> spark = SparkSession.builder()
+  .master(<span class="s">"local[2]"</span>)
+  .config(<span class="s">"spark.sql.extensions"</span>,
+    <span class="s">"io.indextables.extensions.IndexTablesSparkExtensions"</span>)
+  .getOrCreate()</pre></div></li>
+      <li><h3>Write three rows</h3><p>Strings are indexed as exact values unless you ask for text. Here <code>title</code> becomes searchable text.</p>
+        <div class="code"><pre>documents.write.format(<span class="s">"indextables"</span>)
+  .option(<span class="s">"spark.indextables.indexing.typemap.title"</span>, <span class="s">"text"</span>)
+  .partitionBy(<span class="s">"region"</span>).mode(<span class="s">"append"</span>)
+  .save(<span class="s">"/tmp/indextables-example"</span>)</pre></div></li>
+      <li><h3>Search</h3>
+        <div class="code"><pre>spark.sql(<span class="s">"SELECT id, title FROM a WHERE title indexquery 'fox'"</span>).show()</pre><pre class="out"><span class="c"># expected output, checked in CI</span>
+|  1| The quick brown <span class="hit">fox</span> |
+|  2| quick <span class="hit">fox</span> jumps     |</pre></div>
+        <div class="note"><b>Two words mean both.</b> <code>'quick fox'</code> matches rows containing both terms. <span class="spec" tabindex="0">CORE-QRY-IQ<span class="pop"><b>CORE-QRY-IQ · group</b>IndexQuery syntax and semantics. This page cites the whole group, so a new requirement added to it flags this page for review.<small>core/query</small></span></span></div></li>
+    </ol>
+    <div class="next"><a href="#guide"><small>Next</small>Your first table: types, text fields, partitions</a><a href="#ref"><small>Reference</small>Every configuration key</a></div>
+  </article>
+  <aside class="side r"><h4>On this page</h4><a href="#start">Start Spark</a><a href="#start">Write three rows</a><a href="#start">Search</a>
+    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-WR</span><span class="spec">SPARK-RD-SRC</span><span class="spec">CORE-QRY-IQ</span><p>Upstream <code>e947724</code> · code on this page runs in CI</p></div></aside>
+</div></main>
+
+<!-- GUIDE -->
+<main class="view" id="v-guide"><div class="wrap docs">
+  <aside class="side"><h4>Query</h4><a href="#guide">Filter pushdown</a><a href="#guide">IndexQuery cookbook</a><a class="on" href="#guide">Read modes and limits</a><a href="#guide">Aggregates</a><a href="#guide">Bucket aggregations</a>
+    <h4>Write and index</h4><a href="#guide">Create and append</a><a href="#guide">Field types and tokenizers</a><a href="#guide">Partitioning</a>
+    <h4>Maintain</h4><a href="#guide">Merge splits</a><a href="#guide">Checkpoints</a><a href="#guide">Purge</a>
+    <h4>Companions</h4><a href="#guide">Build over Parquet</a><a href="#guide">Delta and Iceberg sync <span class="badge b-plan" style="font-size:9.5px;padding:0 4px">Planned</span></a></aside>
+  <article>
+    <div class="crumb">Guides / Query / Read modes and limits</div>
+    <h1>Choose a read mode</h1>
+    <div class="forwho"><b>For</b>analysts and engineers querying a table. <b style="margin-left:10px">You will</b>know when results are complete and how to make them so.</div>
+    <p>IndexTables has two read modes. Both return only correct rows. They differ in <em>how many</em> matching rows an interactive query brings back.</p>
+    <table><tr><th>Mode</th><th>Returns</th><th>Use it for</th></tr>
+      <tr><td><code>fast</code> (default)</td><td>Up to 250 matching rows for row-returning queries, and says when it stopped early</td><td>Exploring, dashboards, "show me some examples"</td></tr>
+      <tr><td><code>exact</code></td><td>Every matching row</td><td>Exports, joins you will act on, anything you count by hand</td></tr></table>
+    <h2>Switch to exact</h2>
+    <div class="code" data-tabs><div class="tabs"><button class="on" data-l="sql">SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button class="copy">copy</button></div>
+<pre data-l="sql"><span class="k">SET</span> spark.indextables.read.mode = exact;</pre>
+<pre data-l="py" hidden>spark.read.format(<span class="s">"indextables"</span>) \
+  .option(<span class="s">"spark.indextables.read.mode"</span>, <span class="s">"exact"</span>).load(root)</pre>
+<pre data-l="scala" hidden>spark.read.format(<span class="s">"indextables"</span>)
+  .option(<span class="s">"spark.indextables.read.mode"</span>, <span class="s">"exact"</span>).load(root)</pre></div>
+    <h2>What fast mode never limits</h2>
+    <p>The limit applies to rows returned to you. It never shortens the input to a write, a cache, a join or an aggregate. <span class="spec" tabindex="0">SPARK-RD-MODE<span class="pop"><b>SPARK-RD-MODE · group</b>Read modes and the fast-mode cap.<small>spark/read · verified at upstream e947724</small></span></span></p>
+    <div class="note"><b>Why a default limit at all?</b> See <a href="#guide">Concepts: exact, bounded, never approximate</a>.</div>
+    <div class="next"><a href="#guide"><small>Next</small>Aggregates and what is pushed down</a><a href="#ref"><small>Reference</small><code>spark.indextables.read.*</code> keys</a></div>
+  </article>
+  <aside class="side r"><h4>On this page</h4><a href="#guide">Switch to exact</a><a href="#guide">What fast mode never limits</a>
+    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-RD-MODE</span><span class="spec">SPARK-RD-LIM</span><p>Upstream <code>e947724</code> · reviewed 2026-11-17</p><p><a href="#guide">Edit this page</a> · <a href="#guide">Report a problem</a></p></div></aside>
+</div></main>
+
+<!-- REFERENCE -->
+<main class="view" id="v-ref"><div class="wrap" style="padding-top:30px;padding-bottom:60px">
+  <div class="crumb">Reference / Configuration keys</div>
+  <h1 style="font-size:2.4rem">Configuration keys</h1>
+  <p class="sub">Generated from the product's key registry. Every key starts with <code>spark.indextables.</code></p>
+  <div class="filter"><input id="q" placeholder="Filter keys, e.g. cache or s3" aria-label="Filter keys">
+    <button class="chip on" data-a="">All</button><button class="chip" data-a="read">Read</button><button class="chip" data-a="write">Write</button><button class="chip" data-a="storage">Storage</button><button class="chip" data-a="cache">Cache</button></div>
+  <table id="keys"><tr><th>Key</th><th>Type</th><th>Default</th><th>What it does</th><th>Status</th><th>Spec</th></tr>
+    <tr data-a="read"><td class="key"><code>read.mode</code></td><td>enum</td><td><code>fast</code></td><td>Whether row-returning queries are capped (<code>fast</code>) or complete (<code>exact</code>). <a href="#guide">Guide</a></td><td><span class="badge b-ok">Available</span></td><td><span class="spec">SPARK-RD-MODE</span></td></tr>
+    <tr data-a="read"><td class="key"><code>read.defaultLimit</code></td><td>int</td><td><code>250</code></td><td>Row cap applied in fast mode.</td><td><span class="badge b-ok">Available</span></td><td><span class="spec">SPARK-RD-LIM</span></td></tr>
+    <tr data-a="read"><td class="key"><code>acceleration.policy.aggregation</code></td><td>enum</td><td>refuse</td><td>What happens when an aggregate cannot be computed exactly by the index.</td><td><span class="badge b-ok">Available</span></td><td><span class="spec">SPARK-RD-ACC</span></td></tr>
+    <tr data-a="write"><td class="key"><code>indexing.typemap.&lt;column&gt;</code></td><td>string</td><td>—</td><td>How a column is indexed, for example <code>text</code> for tokenized search.</td><td><span class="badge b-ok">Available</span></td><td><span class="spec">SPARK-CFG-KEY</span></td></tr>
+    <tr data-a="write"><td class="key"><code>indexWriter.heapSize</code></td><td>size</td><td>256 MiB</td><td>Memory the index writer may use per task.</td><td><span class="badge b-ok">Available</span></td><td><span class="spec">SPARK-CFG-KEY</span></td></tr>
+    <tr data-a="storage"><td class="key"><code>s3.endpoint</code></td><td>string</td><td>—</td><td>Endpoint for S3-compatible storage.</td><td><span class="badge b-ok">Available</span></td><td><span class="spec">SPARK-CFG-CRED</span></td></tr>
+    <tr data-a="storage"><td class="key"><code>s3.pathStyleAccess</code></td><td>bool</td><td><code>false</code></td><td>Use path-style addressing, needed by some S3-compatible stores.</td><td><span class="badge b-ok">Available</span></td><td><span class="spec">SPARK-CFG-CRED</span></td></tr>
+    <tr data-a="cache"><td class="key"><code>cache.disk.path</code></td><td>string</td><td><code>/local_disk0</code> when writable</td><td>Directory for the persistent disk cache.</td><td><span class="badge b-ok">Available</span></td><td><span class="spec">CORE-CACHE</span></td></tr>
+  </table>
+  <p class="sub" style="font-size:14px;margin-top:14px">Sample rows only. The real page lists about 210 keys. A dash means the default is defined by the owning component and will be filled by the generator.</p>
+</div></main>
+
+<!-- BLOG -->
+<main class="view" id="v-blog"><div class="learn" style="font-size:1rem">
+  <div class="eyebrow">Blog</div><h1>Notes from the project</h1>
+  <div class="banner"><b>Posts before the rebuild</b> describe the 0.x line. Each carries a note linking to the current documentation.</div>
+  <div class="posts" style="grid-template-columns:1fr">
+    <a href="#blog"><time>2026-04-05 · release</time><h3>IndexTables 0.5.5 — Native Rust Transaction Log, DataSource Short Name, and FFI Profiler</h3></a>
+    <a href="#blog"><time>2026-04-04 · architecture</time><h3>The Data Layer Problem No One Is Talking About</h3></a>
+    <a href="#blog"><time>2026-03-15 · release</time><h3>IndexTables 0.5.4 — Streaming Sync, Unified Memory, and Faster Data Paths</h3></a>
+    <a href="#blog"><time>2026-02-16 · release</time><h3>Search Is an Index, Not a Copy: Introducing Companion Mode in IndexTables 0.5.0</h3></a>
+    <a href="#blog"><time>2026-02-02 · release</time><h3>Announcing IndexTables 0.4.5 — Faster, More Reliable, More Scalable</h3></a>
+    <a href="#blog"><time>2026-01-02 · mission</time><h3>Your Fast Search Data Should Be Yours</h3></a>
+  </div>
+</div></main>
+
+<footer><div class="wrap cols">
+  <div><div class="brand" style="margin-bottom:8px">IndexTables</div>Open source search for the lakehouse.<br>Docs verified against upstream <code>e947724</code>.</div>
+  <div><h4>Learn</h4><a href="#why">Why IndexTables</a><a href="#learn">Plain English</a><a href="#start">Quickstart</a></div>
+  <div><h4>Docs</h4><a href="#guide">Guides</a><a href="#guide">Concepts</a><a href="#ref">Reference</a></div>
+  <div><h4>Project</h4><a href="#ref">Status and roadmap</a><a href="#guide">How it is built (LID)</a><a href="#ref">Specification</a></div>
+  <div><h4>Community</h4><a href="#blog">Blog</a><a href="#home">GitHub</a><a href="#home">Contributing</a></div>
+</div></footer>
+
+<div class="ov" id="ov"><div class="sbox"><input id="si" placeholder="Search pages, config keys, SQL commands, errors, spec IDs">
+  <a href="#guide"><span>Guide</span><span>Choose a read mode</span></a>
+  <a href="#ref"><span>Config</span><span><code>spark.indextables.read.mode</code></span></a>
+  <a href="#ref"><span>SQL</span><span><code>MERGE SPLITS</code></span></a>
+  <a href="#home"><span>Error</span><span>Path is required. Use load("path")…</span></a>
+  <a href="#home"><span>Spec</span><span>SPARK-RD-SRC-004</span></a>
+</div></div>
+
+<script>
+const views=['home','why','learn','start','guide','ref','blog'];
+function route(){const h=(location.hash||'#home').slice(1);const v=views.includes(h)?h:'home';
+  document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
+  document.querySelectorAll('.nav nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  document.getElementById('ov').classList.remove('on');window.scrollTo(0,0);}
+addEventListener('hashchange',route);route();
+const root=document.documentElement;
+document.getElementById('theme').onclick=()=>root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';
+function setLang(l){document.querySelectorAll('[data-tabs]').forEach(b=>{
+  b.querySelectorAll('.tabs button[data-l]').forEach(x=>x.classList.toggle('on',x.dataset.l===l));
+  b.querySelectorAll('pre[data-l]').forEach(p=>p.hidden=p.dataset.l!==l);});}
+document.querySelectorAll('[data-tabs] .tabs button[data-l]').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+document.querySelectorAll('.copy').forEach(b=>b.onclick=()=>{b.textContent='copied';setTimeout(()=>b.textContent='copy',1200)});
+const ov=document.getElementById('ov');
+function openS(){ov.classList.add('on');document.getElementById('si').focus()}
+document.getElementById('sbtn').onclick=openS;
+ov.onclick=e=>{if(e.target===ov)ov.classList.remove('on')};
+addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();openS()}if(e.key==='Escape')ov.classList.remove('on')});
+let area='';const q=document.getElementById('q');
+function filt(){const t=q.value.toLowerCase();document.querySelectorAll('#keys tr[data-a]').forEach(r=>{
+  r.style.display=(!area||r.dataset.a===area)&&r.textContent.toLowerCase().includes(t)?'':'none'})}
+q.oninput=filt;document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{area=c.dataset.a;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c));filt()});
+</script>
+</body>
+</html>
