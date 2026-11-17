@@ -283,7 +283,11 @@ Shapes are square-cornered or nearly so (2 px radius), borders are hairlines, an
 
 ### 7.2 Logo
 
-A refreshed mark is suggested to match: a 3×3 table grid with one cell filled in highlight yellow (a hit in a table), beside the wordmark set in the headline serif. The existing magnifier mark could be kept if you prefer continuity; the mockup shows the proposed one so you can judge it.
+The logo is a 3×3 table grid with one cell filled in highlight yellow (a hit in a table), beside the wordmark set in the headline serif. It replaces the table-and-magnifier mark of the 0.x site.
+
+- **Why this mark.** It shows what the product does, it uses the same highlight as the headlines and code output, and it is a few lines and one square, so it stays sharp at favicon size, in one colour and in dark mode.
+- **What the first build stage delivers.** The mark in the mockup is a sketch. The production set is an SVG mark with final proportions, a favicon, a one-colour variant, a dark-mode variant, a wordmark lockup and a social card.
+- **Where it changes.** The site uses the new mark from its first build. The GitHub organisation avatar and social cards change at domain cut-over. Images inside migrated blog posts and the conference talk keep the old mark.
 
 ### 7.3 Alternatives considered
 
@@ -353,7 +357,6 @@ Stages 3 to 5 are the bulk of the work and parallelize well by documentation are
 
 1. Framework: accept Astro with Starlight, or prefer Docusaurus.
 2. Visual direction: "the highlighted page", or one of the alternatives.
-3. Logo: adopt a refreshed mark, or keep the current one.
-4. Navigation labels and the page inventory: anything missing, or anything that should not be public.
-5. Upstream visibility: whether the specification browser and outbound spec links wait until `indextables/indextables` is public.
-6. Domain: replace indextables.io at cut-over, or run the new site on a preview address first.
+3. Navigation labels and the page inventory: anything missing, or anything that should not be public.
+4. Upstream visibility: whether the specification browser and outbound spec links wait until `indextables/indextables` is public.
+5. Domain: replace indextables.io at cut-over, or run the new site on a preview address first.
