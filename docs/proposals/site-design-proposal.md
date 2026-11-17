@@ -28,7 +28,7 @@ Observed in `indextables_web` (Docusaurus classic preset, 36 doc pages, 6 posts)
 
 ## 3. Audiences
 
-The product HLD names four users. The site adds two more who never appear in a product design: the evaluator and the newcomer.
+The product HLD names four users, and its DataFusion binding brings a fifth: the developer who embeds DataFusion. The site adds two more who never appear in a product design: the evaluator and the newcomer.
 
 | Audience | Arrives asking | Lands on |
 |---|---|---|
@@ -37,7 +37,8 @@ The product HLD names four users. The site adds two more who never appear in a p
 | Data engineer | "How do I build and maintain a table?" | Get started, then Guides: Write, Maintain |
 | Analyst or application developer | "How do I search?" | Get started, then Guides: Query |
 | Lakehouse operator | "How do I run this safely, and add search to Delta/Iceberg/Parquet?" | Guides: Operate, Companions, Deploy |
-| Platform builder | "How does it work inside, and how do I embed it?" | Concepts, DataFusion and Comet, Specification |
+| Rust or DataFusion developer | "How do I query these tables from my own process?" | Get started: DataFusion, then Guides: DataFusion |
+| Platform builder | "How does it work inside, and how do I embed it?" | Concepts, Comet, Specification |
 
 ## 4. Framework: comparison and recommendation
 
@@ -90,8 +91,8 @@ This follows the tutorials / how-to / explanation / reference split that most we
 
 ### 5.2 Home page, top to bottom
 
-1. **One sentence and one example.** "Full-text search on lakehouse tables, inside Spark. No search cluster." Beside it, a tabbed example (SQL, PySpark, Scala) that writes a table and searches it.
-2. **Choose your path.** Five cards by role, each going to a different starting page.
+1. **One sentence and one example.** "Full-text search on lakehouse tables, inside your query engine. No search cluster." The sub-line names Apache Spark and Apache DataFusion. Beside it, a tabbed example (Spark SQL, PySpark, Scala, DataFusion) that searches a table.
+2. **Choose your path.** Six cards by role, each going to a different starting page.
 3. **How it works in three steps.** Write an index beside your data; commit it in a transaction log; executors search it directly from object storage.
 4. **Watch the talk.** The 36-minute conference presentation (section 5.5), with a short chapter list beside it.
 5. **What you can do today.** The availability matrix, generated, with planned items marked as planned.
@@ -131,7 +132,8 @@ Class: G = generated, D = derived from cited specs, A = authored (see the sync p
 
 | Page | Class | Upstream source | Old site |
 |---|---|---|---|
-| Quickstart: local Spark in five minutes | D, executable | README quick start; `spark/write` , `spark/read` SRC | getting-started/quickstart |
+| Quickstart with Spark: local Spark in five minutes | D, executable | README quick start; `spark/write` , `spark/read` SRC | getting-started/quickstart |
+| Quickstart with DataFusion: search a table from a Rust process | D, executable | `datafusion/adapter` FAC, IQ, PROV | new |
 | Install: artifacts, Spark and Scala versions, platforms | G + D | `pom.xml`, README artifacts | getting-started/installation |
 | Your first table: types, text fields, partitions | D, executable | `spark/write`, `core/field-model` | getting-started/first-index |
 | Your first searches: IndexQuery in ten examples | D, executable | `core/query` IQ, `spark/read` IQ | query-guide/indexquery-syntax |
@@ -153,7 +155,7 @@ Class: G = generated, D = derived from cited specs, A = authored (see the sync p
 | Storage and credentials | S3 and S3-compatible; Azure; GCS; credential providers and refresh | D | `core/storage`, `spark/config-auth` | configuration/s3-configuration, azure-configuration |
 | Observe and troubleshoot | DESCRIBE commands; the profiler; query traces; CPU profiles; OTLP export; observability without the plugin; troubleshooting by symptom | D | `core/observability`, `spark/operations` | sql-commands/describe-commands, profiler |
 | Deploy | Databricks; AWS EMR; Kubernetes and open-source Spark; Spark Connect; sizing checklist | D + A | `spark/config-auth`, `core/storage`, README | cloud/databricks, aws-emr |
-| DataFusion and Comet | Use the DataFusion table provider; SQL DDL; pushdown; Comet status | D | `datafusion/adapter` | new |
+| DataFusion | Register a table (`CREATE EXTERNAL TABLE … STORED AS INDEXTABLES`, table provider); IndexQuery through `indexquery()` and `indexqueryall()`; filter and aggregate pushdown; partitions; the catalog provider; memory and metrics; errors; what differs from Spark; Comet status | D | `datafusion/adapter` | new |
 
 **Concepts**
 
@@ -242,6 +244,23 @@ Every old URL gets a permanent redirect, generated from one reviewed map and che
 | `/docs/sql-commands/merge-splits` | `/reference/sql/merge-splits` |
 | `/why-indextables` | `/why` |
 
+### 5.7 Engines: Spark and DataFusion
+
+The product is one engine-neutral core with two bindings, and the site presents it that way. Spark leads, because it carries ten of the eleven binding segments and every write path. DataFusion is the second engine throughout, not an appendix.
+
+| Area | Treatment |
+|---|---|
+| Home page | Engine-neutral headline; a DataFusion tab in the hero example; a "Rust developer" path card; an engine column in the availability matrix |
+| Learn and Concepts | Written once, engine-neutral. They describe the core: splits, the transaction log, IndexQuery, exactness, companions |
+| Get started | One quickstart per engine, behind a "With Spark / With DataFusion" switch. The choice is remembered across pages, like the language tabs |
+| Guides | Every guide carries an engine badge. A guide whose behaviour both engines share (IndexQuery syntax, filter pushdown, exact aggregates) shows both forms in tabs. Spark-only topics (writes, maintenance SQL, streaming, fast mode, companion builds) say so and state what a DataFusion user does instead |
+| Reference | Spark configuration and SQL stay as they are. DataFusion gets its own reference pages: SQL functions and DDL, the Rust API link, and its failure conditions |
+| Availability matrix | Generated per engine from the `SPARK-*`, `DF-AD-*` and `CORE-*` spec markers, so a capability that exists in one engine only is shown as such |
+
+The engine badge is generated, not typed: a page that cites only `SPARK-*` specs is badged Spark, one that cites only `DF-AD-*` is badged DataFusion, and one that cites only `CORE-*` or both is badged for both.
+
+The navigation is built so that a third binding is one more entry in the switch, the matrix and the Guides list, with no change to Learn or Concepts.
+
 ## 6. Usability rules
 
 These become site EARS specs, so they are checked and not merely intended.
@@ -249,8 +268,8 @@ These become site EARS specs, so they are checked and not merely intended.
 1. **Three clicks to any page, one keystroke to search.** `/` opens search from anywhere. Search covers pages, configuration keys, SQL commands, error text and spec IDs.
 2. **Every page says who it is for and what you will have at the end**, in its first two lines.
 3. **One page, one job.** A guide does not explain theory; it links to the concept. A reference page does not teach; it links to the guide.
-4. **Code first.** Guides show the working example before the explanation. Every block has a copy button. The SQL / PySpark / Scala choice is remembered across the site.
-5. **Status is always visible.** Available, Planned, Deferred, and "Spark 4 only" badges come from spec markers and are never hand-typed.
+4. **Code first.** Guides show the working example before the explanation. Every block has a copy button. The language choice (Spark SQL, PySpark, Scala, DataFusion) and the engine choice are remembered across the site.
+5. **Status is always visible.** Available, Planned, Deferred, engine (Spark, DataFusion) and "Spark 4 only" badges come from spec markers and are never hand-typed.
 6. **Statements are checkable.** Reference claims carry spec chips. Each page footer shows the upstream commit it was verified against.
 7. **Next step on every page.** No dead ends.
 8. **Plain words first.** A term's first use on a page is plain English, with the formal name after it and a hover definition from the glossary.
@@ -340,18 +359,28 @@ Hosting: GitHub Pages from this repository, on `indextables.io` (with `www` redi
 
 ## 9. Delivery sequence
 
+**The site is generated after the product's intent is fully implemented.** Generation starts when upstream `scripts/spec-check.py` reports no active-gap (`[ ]`) spec in any segment. The site pins that commit. Specs marked deferred (`[D]`) remain and are shown as Deferred.
+
+What the gate buys:
+
+- Derived pages are drafted once, against settled specs, instead of being redrafted as slices land.
+- Executable tutorials can run against a real build from the first page.
+- The first published availability matrix has no "Planned" rows. The Planned badge stays in the design for requirements upstream adds after launch.
+
 | Stage | Contents | Depends on |
 |---|---|---|
-| 0 | Your decisions on these proposals; site HLD written from them | — |
-| 1 | Repository bootstrap: LID, framework, design tokens, home page, blog migration, redirects | Stage 0 |
-| 2 | Upstream link and generators (configuration, status, specification browser) | Stage 0 |
-| 3 | Get started and Learn, with executable tutorials | Stages 1–2 |
-| 4 | Guides and Concepts, area by area, in the order of the product's completed slices | Stage 2 |
-| 5 | Remaining Reference, error catalog, DataFusion section | Stage 2 |
-| 6 | Sync job, then the agent step | Stage 2 |
-| 7 | Cut-over of indextables.io, timed with the cleanroom release | All |
+| 0 | Your decisions on these proposals | — |
+| Gate | Upstream reports zero active-gap specs; that commit becomes the pin | Upstream |
+| 1 | Site LID: `AGENTS.md`, HLD, LLDs and EARS written from the approved proposals | Gate |
+| 2 | Repository bootstrap: framework, design tokens, logo set, home page, blog and talk migration, redirects | Stage 1 |
+| 3 | Upstream link and generators (configuration, per-engine availability, specification browser) | Stage 1 |
+| 4 | Get started for Spark and for DataFusion, and Learn, with executable tutorials | Stages 2–3 |
+| 5 | Guides and Concepts, area by area, DataFusion guides included | Stage 3 |
+| 6 | Remaining Reference and the failure catalog | Stage 3 |
+| 7 | Sync job, then the agent step | Stage 3 |
+| 8 | Cut-over of indextables.io, timed with the cleanroom release | All |
 
-Stages 3 to 5 are the bulk of the work and parallelize well by documentation area.
+Stages 4 to 6 are the bulk of the work and parallelize well by documentation area.
 
 ## 10. Decisions needed from you
 

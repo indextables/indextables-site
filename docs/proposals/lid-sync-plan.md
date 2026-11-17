@@ -220,10 +220,10 @@ An `upstream-map.yaml` beside `docs/arrows/index.yaml` records, for each upstrea
 | `spark/config-auth`, `core/storage` | Operators | Configuration reference, storage and credentials guides |
 | `spark/catalog`, `core/catalog-entry` | Engineers, operators | Catalog guides |
 | `spark/streaming` | Data engineers | Streaming guide |
-| `spark/companion-sync`, `core/companion-format`, `core/source-readers` | Lakehouse operators | Companion guides (most of this is still planned upstream) |
+| `spark/companion-sync`, `core/companion-format`, `core/source-readers` | Lakehouse operators | Companion guides |
 | `core/cache`, `spark/memory` | Operators | Caching, prewarm and memory guides |
 | `core/observability` | Operators | Observability guides, metrics reference |
-| `datafusion/adapter` | Platform builders | DataFusion and Comet section |
+| `datafusion/adapter` | Rust and DataFusion developers, platform builders | DataFusion quickstart, DataFusion guides and reference, Comet page; the engine column of the availability matrix |
 | `core/table-format`, `core/split-format`, `core/partition-encoding`, `core/table-log` | Platform builders, the curious | Concepts, plus a format specification section |
 | `spark/native-boundary` | Contributors | Internals; specification browser only |
 
@@ -236,23 +236,26 @@ An `upstream-map.yaml` beside `docs/arrows/index.yaml` records, for each upstrea
 
 ## 10. Rollout
 
+Site generation starts once upstream `scripts/spec-check.py` reports no active-gap (`[ ]`) spec. The first pin is that commit, so the first drafting pass runs against settled intent and drift detection begins from a stable baseline.
+
 | Step | Result |
 |---|---|
-| 1. Bootstrap | LID installed in this repo (`AGENTS.md`, vendored workflow doc, HLD drafted from the approved proposals) |
-| 2. Link core | Lock file, snapshot, citation schema, `citations-resolve` and `fingerprints-current` checks |
-| 3. Generators | Configuration reference, availability matrix, specification browser, error catalog |
-| 4. First content | Getting started and core guides, drafted against the pin with citations |
-| 5. Sync job | Scheduled job and rolling PR, without an agent step |
-| 6. Agent step | Plug in the chosen agent once you decide which |
-| 7. Versions | Switch from `next` to tagged versions at the first cleanroom release |
+| 1. Gate | Upstream reports zero active-gap specs; that commit is recorded in `upstream.lock.yaml` |
+| 2. Bootstrap | LID installed in this repo (`AGENTS.md`, vendored workflow doc, HLD drafted from the approved proposals) |
+| 3. Link core | Lock file, snapshot, citation schema, `citations-resolve` and `fingerprints-current` checks |
+| 4. Generators | Configuration reference, per-engine availability matrix, specification browser, error catalog |
+| 5. First content | Getting started for Spark and DataFusion, and core guides, drafted against the pin with citations |
+| 6. Sync job | Scheduled job and rolling PR, without an agent step |
+| 7. Agent step | Plug in the chosen agent once you decide which |
+| 8. Versions | Switch from `next` to tagged versions at the first cleanroom release |
 
 ## 11. Risks and open items
 
 | Item | Why it matters | Proposed handling |
 |---|---|---|
 | Upstream is private today | A public site would publish spec text and link to pages the public cannot open; CI needs a read credential | Until upstream is public: CI uses a read-only deploy key, spec chips show the requirement text but do not link out, and the specification browser is not published. Flip one setting when upstream opens. |
-| Upstream churn | Specs change many times a day during the cleanroom build | Rolling PR; group-level citations keep the number of stale pages proportional to real change |
-| Citation granularity | Too coarse makes every page stale constantly; too fine misses new behavior | Group citations by default, single IDs for specific claims; tune with real drift data in step 5 |
+| Upstream churn | Specs change many times a day during the cleanroom build | Generation waits for zero active-gap specs (section 10); after that, the rolling PR and group-level citations keep the number of stale pages proportional to real change |
+| Citation granularity | Too coarse makes every page stale constantly; too fine misses new behavior | Group citations by default, single IDs for specific claims; tune with real drift data after the first content step |
 | Parsing design-doc tables | A reformatted table breaks a generator | Shape check fails loudly; longer term, the upstream export in section 12 |
 | Agent drafting quality | A fluent but wrong paragraph is worse than a missing one | Claims need a `<Spec>` chip or sit under a page-level citation; `availability-honest`; tutorials execute; you review |
 

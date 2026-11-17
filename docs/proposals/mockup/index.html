@@ -67,9 +67,9 @@ header.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--p
 /* sections */
 section.band{padding:60px 0;border-bottom:1px solid var(--rule)}
 .sub{color:var(--muted);max-width:44em;font-size:1.05rem}
-.paths{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--rule);margin-top:26px;background:var(--card)}
-.paths a{padding:20px 18px 22px;border-right:1px solid var(--rule);text-decoration:none;color:var(--ink);display:block}
-.paths a:last-child{border-right:0} .paths a:hover{background:var(--paper2)}
+.paths{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;border:1px solid var(--rule);margin-top:26px;background:var(--rule)}
+.paths a{padding:20px 18px 22px;background:var(--card);text-decoration:none;color:var(--ink);display:block}
+.paths a:hover{background:var(--paper2)}
 .paths .who{font:500 11.5px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .paths h3{margin:.45em 0 .35em;font-size:1.08rem} .paths p{font-size:14px;color:var(--muted);margin:0 0 .8em}
 .paths .go{font-size:13.5px;font-weight:600;color:var(--accent)}
@@ -81,6 +81,7 @@ th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vert
 th{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--ink)}
 .badge{display:inline-flex;align-items:center;gap:5px;font:600 11.5px var(--mono);padding:2px 7px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
 .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.eng{display:inline-block;font:500 11.5px var(--mono);background:var(--paper2);border:1px solid var(--rule);padding:1px 6px;border-radius:2px}
 .b-ok{color:var(--ok)}.b-plan{color:var(--plan)}.b-def{color:var(--defer)}
 .spec{display:inline-block;font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--rule);background:var(--card);padding:1px 6px;border-radius:2px;cursor:pointer;position:relative;vertical-align:1px}
 .spec:hover,.spec:focus{border-color:var(--accent);color:var(--accent);outline:0}
@@ -123,6 +124,10 @@ article .code{margin:14px 0 20px}
 .next{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:38px}
 .next a{border:1px solid var(--rule);padding:14px 16px;text-decoration:none;color:var(--ink);background:var(--card)}
 .next a:hover{border-color:var(--accent)} .next small{display:block;color:var(--muted);font:12px var(--mono)}
+.eswitch{display:flex;align-items:center;gap:0;margin:0 0 18px;border-bottom:2px solid var(--ink)}
+.eswitch button{font:600 14px var(--sans);padding:9px 16px;border:0;background:none;color:var(--muted);cursor:pointer}
+.eswitch button.on{background:var(--ink);color:var(--paper)}
+.eswitch span{margin-left:auto;font-size:12.5px;color:var(--muted)}
 .stepn{counter-reset:s;list-style:none;padding:0}
 .stepn>li{counter-increment:s;position:relative;padding:0 0 8px 46px;border-left:1px solid var(--rule);margin-left:15px}
 .stepn>li::before{content:counter(s);position:absolute;left:-16px;top:-2px;width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);font:600 14px/30px var(--mono);text-align:center}
@@ -148,7 +153,7 @@ td.key code{font-weight:500;border:0;background:none;padding:0}
 .sbox a{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:10px 18px;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--rule);font-size:14.5px}
 .sbox a:hover{background:var(--paper2)} .sbox a span:first-child{font:11.5px var(--mono);color:var(--muted);text-transform:uppercase;padding-top:3px}
 .banner{border:1px solid var(--plan);color:var(--ink);background:var(--card);padding:10px 14px;font-size:14px;margin:14px 0 22px}
-@media(max-width:980px){.hero .grid,.two{grid-template-columns:1fr}.paths{grid-template-columns:1fr 1fr}.paths a{border-bottom:1px solid var(--rule)}.steps,.posts{grid-template-columns:1fr}.docs{grid-template-columns:1fr}.side{position:static;max-height:none}.side.r{display:none}footer .cols{grid-template-columns:1fr 1fr}.tools .lbl{display:none}}
+@media(max-width:980px){.hero .grid,.two{grid-template-columns:1fr}.paths{grid-template-columns:1fr 1fr}.steps,.posts{grid-template-columns:1fr}.docs{grid-template-columns:1fr}.side{position:static;max-height:none}.side.r{display:none}footer .cols{grid-template-columns:1fr 1fr}.tools .lbl{display:none}}
 </style>
 </head>
 <body>
@@ -172,13 +177,13 @@ td.key code{font-weight:500;border:0;background:none;padding:0}
 <main class="view" id="v-home">
   <div class="hero"><div class="wrap grid">
     <div class="inner">
-      <div class="eyebrow">Open source · Apache Spark · Rust core</div>
-      <h1>Full-text <mark>search</mark> on lakehouse tables, inside Spark.</h1>
-      <p class="lede">IndexTables writes search indexes next to your data in object storage. Spark executors query them directly, so there is no search cluster to run, feed or pay for.</p>
+      <div class="eyebrow">Open source · Spark · DataFusion · Rust core</div>
+      <h1>Full-text <mark>search</mark> on lakehouse tables, inside your query engine.</h1>
+      <p class="lede">IndexTables writes search indexes next to your data in object storage. Apache Spark and Apache DataFusion query them directly, so there is no search cluster to run, feed or pay for.</p>
       <div class="cta"><a class="btn p" href="#start">Get started in 5 minutes</a><a class="btn" href="#learn">Explain it to me simply</a></div>
     </div>
     <div class="code" data-tabs>
-      <div class="tabs"><button class="on" data-l="sql">SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button class="copy">copy</button></div>
+      <div class="tabs"><button class="on" data-l="sql">Spark SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button data-l="df">DataFusion</button><button class="copy">copy</button></div>
 <pre data-l="sql"><span class="c">-- register an existing table, then search it</span>
 <span class="k">CREATE TABLE</span> docs <span class="k">USING</span> indextables
 <span class="k">LOCATION</span> <span class="s">'s3://my-bucket/docs'</span>;
@@ -202,6 +207,14 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
 <span class="k">val</span> docs = spark.read.format(<span class="s">"indextables"</span>).load(<span class="s">"s3://my-bucket/docs"</span>)
 docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</span>)
     .select(<span class="s">"id"</span>, <span class="s">"title"</span>).show()</pre>
+<pre data-l="df" hidden><span class="c">-- DataFusion SQL: same table, same index</span>
+<span class="k">CREATE EXTERNAL TABLE</span> docs
+<span class="k">STORED AS</span> INDEXTABLES
+<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/docs'</span>;
+
+<span class="k">SELECT</span> id, title <span class="k">FROM</span> docs
+<span class="k">WHERE</span> <span class="k">indexquery</span>(title, <span class="s">'quick fox'</span>)
+  <span class="k">AND</span> region = <span class="s">'us'</span>;</pre>
 <pre class="out">+---+---------------------+
 | id| title               |
 +---+---------------------+
@@ -213,13 +226,14 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
 
   <section class="band"><div class="wrap">
     <h2>Start where <mark>you</mark> are</h2>
-    <p class="sub">Five ways in. Each one skips what you do not need.</p>
+    <p class="sub">Six ways in. Each one skips what you do not need.</p>
     <div class="paths">
       <a href="#why"><div class="who">Evaluating</div><h3>Should we use this?</h3><p>What it is, where it fits, and when it is the wrong tool.</p><span class="go">Why IndexTables →</span></a>
       <a href="#learn"><div class="who">New to search</div><h3>Explain it simply</h3><p>Indexes, splits and logs in plain language, with pictures.</p><span class="go">Learn →</span></a>
       <a href="#start"><div class="who">Data engineer</div><h3>Build a table</h3><p>Write, partition, merge and maintain searchable tables.</p><span class="go">Quickstart →</span></a>
       <a href="#guide"><div class="who">Analyst · developer</div><h3>Search my data</h3><p>IndexQuery, filters and aggregates from SQL or DataFrames.</p><span class="go">Query guides →</span></a>
       <a href="#ref"><div class="who">Operator</div><h3>Run it safely</h3><p>Storage, credentials, caching, observability, every setting.</p><span class="go">Operate →</span></a>
+      <a href="#start"><div class="who">Rust developer</div><h3>Embed it</h3><p>Query the same tables from DataFusion, in your own process, with no JVM.</p><span class="go">DataFusion quickstart →</span></a>
     </div>
   </div></section>
 
@@ -228,7 +242,7 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
     <div class="steps">
       <div><div class="n">1</div><h3>Write an index beside your data</h3><p>A Spark write produces immutable index files, called splits, in your own bucket.</p></div>
       <div><div class="n">2</div><h3>Commit it in a transaction log</h3><p>Each write is one atomic commit. Readers always see a consistent snapshot.</p></div>
-      <div><div class="n">3</div><h3>Search from the executors</h3><p>Executors open only the splits and bytes a query needs. No server sits in between.</p></div>
+      <div><div class="n">3</div><h3>Search from your engine</h3><p>Spark executors, or a DataFusion process, open only the splits and bytes a query needs. No server sits in between.</p></div>
     </div>
   </div></section>
 
@@ -253,13 +267,13 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
     <h2>What you can do <mark>today</mark></h2>
     <p class="sub">This table is generated from the project's requirement status, not written by hand.</p>
     <table style="margin-top:18px">
-      <tr><th>Area</th><th>Capability</th><th>Status</th></tr>
-      <tr><td>Tables</td><td>Create, append, overwrite, partition; exact and fast read modes</td><td><span class="badge b-ok">Available</span></td></tr>
-      <tr><td>Search</td><td>IndexQuery, filter pushdown, exact aggregate pushdown</td><td><span class="badge b-ok">Available</span></td></tr>
-      <tr><td>Streaming</td><td>Structured Streaming source</td><td><span class="badge b-ok">Available</span></td></tr>
-      <tr><td>Companions</td><td>Index an existing Parquet directory without copying it</td><td><span class="badge b-ok">Available</span></td></tr>
-      <tr><td>Companions</td><td>Delta and Iceberg build and incremental sync</td><td><span class="badge b-plan">Planned</span></td></tr>
-      <tr><td>Storage</td><td>Azure and GCS writes</td><td><span class="badge b-def">Gated</span></td></tr>
+      <tr><th>Area</th><th>Capability</th><th>Engine</th><th>Status</th></tr>
+      <tr><td>Tables</td><td>Create, append, overwrite, partition</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Search</td><td>IndexQuery, filter pushdown, exact aggregate pushdown</td><td><span class="eng">Spark</span> <span class="eng">DataFusion</span></td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Streaming</td><td>Structured Streaming source</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Companions</td><td>Index an existing Parquet directory without copying it</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Companions</td><td>Delta and Iceberg build and incremental sync</td><td><span class="eng">Spark</span></td><td><span class="badge b-plan">Planned</span></td></tr>
+      <tr><td>Tables</td><td>Writes from DataFusion</td><td><span class="eng">DataFusion</span></td><td><span class="badge b-def">Deferred</span></td></tr>
     </table>
     <p style="margin-top:14px"><a href="#ref">Full feature status →</a></p>
   </div></section>
@@ -330,7 +344,7 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
   <h2>Where the index lives</h2>
   <p>A search server keeps its index on its own disks. IndexTables keeps it as ordinary files in the same bucket as your tables. Each file is called a <span class="tip" title="Glossary: an immutable index file covering a set of rows">split</span>, and a small log records which splits make up the table right now.</p>
   <h2>Who does the searching</h2>
-  <p>Spark does. Each executor fetches just the parts of the splits a query needs. When the query ends, nothing is left running.</p>
+  <p>Your query engine does: Apache Spark, or Apache DataFusion inside your own program. It fetches just the parts of the splits a query needs. When the query ends, nothing is left running.</p>
   <div class="next"><a href="#start"><small>Ready to try it</small>Quickstart: local Spark in five minutes</a><a href="#guide"><small>Keep learning</small>Exact answers and fast answers</a></div>
 </div></main>
 
@@ -340,6 +354,8 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
   <article>
     <div class="crumb">Get started / Quickstart</div>
     <h1>Quickstart</h1>
+    <div class="eswitch" role="tablist"><button class="on" data-e="spark">With Spark</button><button data-e="df">With DataFusion</button><span>Your choice is remembered across the docs.</span></div>
+    <div data-eng="spark">
     <div class="forwho"><b>For</b>anyone with Spark 3.5 or 4.x and JDK 17. <b style="margin-left:10px">You will</b>write a small table and run a text search, on your laptop.</div>
     <ol class="stepn">
       <li><h3>Start Spark with the extension</h3>
@@ -359,10 +375,30 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
 |  2| quick <span class="hit">fox</span> jumps     |</pre></div>
         <div class="note"><b>Two words mean both.</b> <code>'quick fox'</code> matches rows containing both terms. <span class="spec" tabindex="0">CORE-QRY-IQ<span class="pop"><b>CORE-QRY-IQ · group</b>IndexQuery syntax and semantics. This page cites the whole group, so a new requirement added to it flags this page for review.<small>core/query</small></span></span></div></li>
     </ol>
+    </div>
+    <div data-eng="df" hidden>
+    <div class="forwho"><b>For</b>Rust developers using DataFusion. <b style="margin-left:10px">You will</b>search an existing IndexTables table from your own process, with no JVM.</div>
+    <ol class="stepn">
+      <li><h3>Add the adapter</h3>
+        <div class="code"><pre>cargo add indextables-datafusion</pre></div>
+        <p>Register the adapter on your <code>SessionContext</code>. That adds the <code>INDEXTABLES</code> table format and the <code>indexquery</code> functions.</p></li>
+      <li><h3>Point at a table</h3>
+        <div class="code"><pre><span class="k">CREATE EXTERNAL TABLE</span> docs
+<span class="k">STORED AS</span> INDEXTABLES
+<span class="k">LOCATION</span> <span class="s">'/tmp/indextables-example'</span>;</pre></div>
+        <div class="note"><b>DataFusion reads tables.</b> Creating and writing them is done from Spark today. <span class="badge b-def">Writes deferred</span></div></li>
+      <li><h3>Search</h3>
+        <div class="code"><pre><span class="k">SELECT</span> id, title <span class="k">FROM</span> docs
+<span class="k">WHERE</span> <span class="k">indexquery</span>(title, <span class="s">'fox'</span>);</pre><pre class="out"><span class="c"># expected output, checked in CI</span>
+|  1| The quick brown <span class="hit">fox</span> |
+|  2| quick <span class="hit">fox</span> jumps     |</pre></div>
+        <div class="note"><b>Same answer as Spark.</b> Both engines call the same core, and the project tests them against the same expected results. <span class="spec" tabindex="0">DF-AD-IQ<span class="pop"><b>DF-AD-IQ · group</b>IndexQuery in DataFusion through the <code>indexquery</code> and <code>indexqueryall</code> functions.<small>datafusion/adapter</small></span></span></div></li>
+    </ol>
+    </div>
     <div class="next"><a href="#guide"><small>Next</small>Your first table: types, text fields, partitions</a><a href="#ref"><small>Reference</small>Every configuration key</a></div>
   </article>
   <aside class="side r"><h4>On this page</h4><a href="#start">Start Spark</a><a href="#start">Write three rows</a><a href="#start">Search</a>
-    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-WR</span><span class="spec">SPARK-RD-SRC</span><span class="spec">CORE-QRY-IQ</span><p>Upstream <code>e947724</code> · code on this page runs in CI</p></div></aside>
+    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-WR</span><span class="spec">SPARK-RD-SRC</span><span class="spec">CORE-QRY-IQ</span><span class="spec">DF-AD-FAC</span><span class="spec">DF-AD-IQ</span><p>Upstream <code>e947724</code> · code on this page runs in CI</p></div></aside>
 </div></main>
 
 <!-- GUIDE -->
@@ -370,9 +406,10 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
   <aside class="side"><h4>Query</h4><a href="#guide">Filter pushdown</a><a href="#guide">IndexQuery cookbook</a><a class="on" href="#guide">Read modes and limits</a><a href="#guide">Aggregates</a><a href="#guide">Bucket aggregations</a>
     <h4>Write and index</h4><a href="#guide">Create and append</a><a href="#guide">Field types and tokenizers</a><a href="#guide">Partitioning</a>
     <h4>Maintain</h4><a href="#guide">Merge splits</a><a href="#guide">Checkpoints</a><a href="#guide">Purge</a>
+    <h4>DataFusion</h4><a href="#start">Register a table</a><a href="#guide">Pushdown and aggregates</a><a href="#guide">Catalog provider</a><a href="#guide">Comet</a>
     <h4>Companions</h4><a href="#guide">Build over Parquet</a><a href="#guide">Delta and Iceberg sync <span class="badge b-plan" style="font-size:9.5px;padding:0 4px">Planned</span></a></aside>
   <article>
-    <div class="crumb">Guides / Query / Read modes and limits</div>
+    <div class="crumb">Guides / Query / Read modes and limits &nbsp; <span class="eng">Spark</span></div>
     <h1>Choose a read mode</h1>
     <div class="forwho"><b>For</b>analysts and engineers querying a table. <b style="margin-left:10px">You will</b>know when results are complete and how to make them so.</div>
     <p>IndexTables has two read modes. Both return only correct rows. They differ in <em>how many</em> matching rows an interactive query brings back.</p>
@@ -380,7 +417,7 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
       <tr><td><code>fast</code> (default)</td><td>Up to 250 matching rows for row-returning queries, and says when it stopped early</td><td>Exploring, dashboards, "show me some examples"</td></tr>
       <tr><td><code>exact</code></td><td>Every matching row</td><td>Exports, joins you will act on, anything you count by hand</td></tr></table>
     <h2>Switch to exact</h2>
-    <div class="code" data-tabs><div class="tabs"><button class="on" data-l="sql">SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button class="copy">copy</button></div>
+    <div class="code" data-tabs><div class="tabs"><button class="on" data-l="sql">Spark SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button class="copy">copy</button></div>
 <pre data-l="sql"><span class="k">SET</span> spark.indextables.read.mode = exact;</pre>
 <pre data-l="py" hidden>spark.read.format(<span class="s">"indextables"</span>) \
   .option(<span class="s">"spark.indextables.read.mode"</span>, <span class="s">"exact"</span>).load(root)</pre>
@@ -388,6 +425,7 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
   .option(<span class="s">"spark.indextables.read.mode"</span>, <span class="s">"exact"</span>).load(root)</pre></div>
     <h2>What fast mode never limits</h2>
     <p>The limit applies to rows returned to you. It never shortens the input to a write, a cache, a join or an aggregate. <span class="spec" tabindex="0">SPARK-RD-MODE<span class="pop"><b>SPARK-RD-MODE · group</b>Read modes and the fast-mode cap.<small>spark/read · verified at upstream e947724</small></span></span></p>
+    <div class="note"><b>Using DataFusion?</b> Fast mode is a Spark feature today. DataFusion queries return every matching row.</div>
     <div class="note"><b>Why a default limit at all?</b> See <a href="#guide">Concepts: exact, bounded, never approximate</a>.</div>
     <div class="next"><a href="#guide"><small>Next</small>Aggregates and what is pushed down</a><a href="#ref"><small>Reference</small><code>spark.indextables.read.*</code> keys</a></div>
   </article>
@@ -455,6 +493,7 @@ addEventListener('hashchange',route);route();
 const root=document.documentElement;
 document.getElementById('theme').onclick=()=>root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';
 function setLang(l){document.querySelectorAll('[data-tabs]').forEach(b=>{
+  if(!b.querySelector('pre[data-l="'+l+'"]'))return;
   b.querySelectorAll('.tabs button[data-l]').forEach(x=>x.classList.toggle('on',x.dataset.l===l));
   b.querySelectorAll('pre[data-l]').forEach(p=>p.hidden=p.dataset.l!==l);});}
 document.querySelectorAll('[data-tabs] .tabs button[data-l]').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
@@ -465,6 +504,9 @@ document.getElementById('sbtn').onclick=openS;
 ov.onclick=e=>{if(e.target===ov)ov.classList.remove('on')};
 addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();openS()}if(e.key==='Escape')ov.classList.remove('on')});
 document.querySelectorAll('.vid').forEach(v=>v.onclick=()=>{v.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+v.dataset.yt+'?autoplay=1" title="1000× Faster Retrieval" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'});
+document.querySelectorAll('.eswitch button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.eswitch button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('[data-eng]').forEach(d=>d.hidden=d.dataset.eng!==b.dataset.e)});
 let area='';const q=document.getElementById('q');
 function filt(){const t=q.value.toLowerCase();document.querySelectorAll('#keys tr[data-a]').forEach(r=>{
   r.style.display=(!area||r.dataset.a===area)&&r.textContent.toLowerCase().includes(t)?'':'none'})}
