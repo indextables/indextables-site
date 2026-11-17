@@ -33,7 +33,7 @@ The product HLD names four users, and its DataFusion binding brings a fifth: the
 | Audience | Arrives asking | Lands on |
 |---|---|---|
 | Evaluator (architect, lead, manager) | "What is this, and should we care?" | Why IndexTables |
-| Newcomer (knows SQL, not search) | "What is full-text search on a lakehouse?" | Learn |
+| Newcomer (knows SQL, not search) | "What does an index on a lakehouse table do for me?" | Learn |
 | Data engineer | "How do I build and maintain a table?" | Get started, then Guides: Write, Maintain |
 | Analyst or application developer | "How do I search?" | Get started, then Guides: Query |
 | Lakehouse operator | "How do I run this safely, and add search to Delta/Iceberg/Parquet?" | Guides: Operate, Companions, Deploy |
@@ -91,9 +91,9 @@ This follows the tutorials / how-to / explanation / reference split that most we
 
 ### 5.2 Home page, top to bottom
 
-1. **One sentence and one example.** "Full-text search on lakehouse tables, inside your query engine. No search cluster." The sub-line names Apache Spark and Apache DataFusion. Beside it, a tabbed example (Spark SQL, PySpark, Scala, DataFusion) that searches a table.
+1. **One sentence and one example.** "Fast search and retrieval on lakehouse tables, inside your query engine." The sub-line names full-text search, exact match and range lookups, then Apache Spark and Apache DataFusion, then "no search cluster". Beside it, a tabbed example (Spark SQL, PySpark, Scala, DataFusion) whose one query combines a text match, an exact match and a time range.
 2. **Choose your path.** Six cards by role, each going to a different starting page.
-3. **How it works in three steps.** Write a table, or index one you already have; commit it in a transaction log; the engine searches it directly from object storage. Below the steps, two equal cards name the two kinds of table: a standalone table, where IndexTables stores the data and the index, and a companion table, an index over an existing Delta, Iceberg or Parquet table.
+3. **How it works in three steps.** Write a table, or index one you already have; commit it in a transaction log; the engine searches it directly from object storage. Below the steps, a "What the index answers" row shows four one-line examples (text search, exact match, range, counts and totals), and two equal cards name the two kinds of table: a standalone table, where IndexTables stores the data and the index, and a companion table, an index over an existing Delta, Iceberg or Parquet table.
 4. **Watch the talk.** The 36-minute conference presentation (section 5.5), with a short chapter list beside it.
 5. **What you can do today.** The availability matrix, generated, with planned items marked as planned.
 6. **Documentation you can check.** A short explanation that every reference statement cites a numbered requirement, with a live spec chip to click.
@@ -269,6 +269,15 @@ IndexTables has two kinds of table, and the site gives them equal weight. A stan
 - Each kind has its own entry point: the quickstart creates a standalone table, and a second short tutorial adds a companion to an existing table.
 - "Standard tables and companions: which do I need?" in Learn is the decision page, and the home page cards link to it.
 - Guides state which kind they apply to when the behaviour differs.
+
+### 5.9 Search and retrieval
+
+The index answers four kinds of question: text search, exact match, range, and counts or aggregates. The site presents all four, because most visitors arrive needing a fast lookup, not text search.
+
+- The headline says "search and retrieval". Full-text search is named first in the sub-line and remains the lead differentiator: Delta and Iceberg have file statistics and Bloom filters for some exact-match and range queries, and nothing for text. The Why page makes that comparison in a table.
+- "Search" alone is not used to mean only text search. Ordinary SQL filters are shown as first-class beside IndexQuery, and examples combine them.
+- The plain-language Learn page explains the idea once: the index finds the matching rows without reading the rest, whatever the kind of match.
+- "Fast" is stated as a mechanism (an index lookup instead of a scan). The site publishes no speed figures for the cleanroom until they are measured.
 
 ## 6. Usability rules
 

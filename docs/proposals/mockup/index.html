@@ -76,6 +76,9 @@ section.band{padding:60px 0;border-bottom:1px solid var(--rule)}
 .modes .who{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .modes h3{font:600 19px var(--serif);margin:6px 0 6px}
 .modes p{margin:0 0 10px;color:var(--muted);font-size:14.5px}
+.modes.four{grid-template-columns:repeat(4,1fr)}
+.modes .q{font:500 12.5px var(--mono);color:var(--ink);background:var(--paper2);padding:6px 8px;margin:8px 0;word-break:break-word}
+@media(max-width:900px){.modes.four{grid-template-columns:1fr 1fr}}
 .modes .go{color:var(--accent);font-weight:600;font-size:14px;text-decoration:none}
 @media(max-width:760px){.modes{grid-template-columns:1fr}}
 .paths .who{font:500 11.5px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -186,49 +189,40 @@ td.key code{font-weight:500;border:0;background:none;padding:0}
   <div class="hero"><div class="wrap grid">
     <div class="inner">
       <div class="eyebrow">Open source · Spark · DataFusion · Rust core</div>
-      <h1>Full-text <mark>search</mark> on lakehouse tables, inside your query engine.</h1>
-      <p class="lede">Store data in an IndexTables table, or add an index to the Delta, Iceberg or Parquet tables you already have. Either way it lives in your object storage, and Apache Spark and Apache DataFusion query it directly. There is no search cluster to run, feed or pay for.</p>
+      <h1>Fast <mark>search</mark> and retrieval on lakehouse tables, inside your query engine.</h1>
+      <p class="lede">Full-text search, exact match and range lookups, answered from an index instead of a scan. Store data in an IndexTables table, or add an index to the Delta, Iceberg or Parquet tables you already have. Either way it lives in your object storage, and Apache Spark and Apache DataFusion query it directly. There is no search cluster to run, feed or pay for.</p>
       <div class="cta"><a class="btn p" href="#start">Get started in 5 minutes</a><a class="btn" href="#learn">Explain it to me simply</a></div>
     </div>
     <div class="code" data-tabs>
       <div class="tabs"><button class="on" data-l="sql">Spark SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button data-l="df">DataFusion</button><button class="copy">copy</button></div>
-<pre data-l="sql"><span class="c">-- register an existing table, then search it</span>
-<span class="k">CREATE TABLE</span> docs <span class="k">USING</span> indextables
-<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/docs'</span>;
+<pre data-l="sql"><span class="k">SELECT</span> ts, host, message <span class="k">FROM</span> events
+<span class="k">WHERE</span> message <span class="k">indexquery</span> <span class="s">'timeout'</span>        <span class="c">-- text search</span>
+  <span class="k">AND</span> service = <span class="s">'checkout'</span>              <span class="c">-- exact match</span>
+  <span class="k">AND</span> ts >= <span class="s">'2026-11-17 09:00'</span>;        <span class="c">-- range</span></pre>
+<pre data-l="py" hidden>events = spark.read.format(<span class="s">"indextables"</span>) \
+    .load(<span class="s">"s3://my-bucket/events"</span>)
 
-<span class="k">SELECT</span> id, title <span class="k">FROM</span> docs
-<span class="k">WHERE</span> title <span class="k">indexquery</span> <span class="s">'quick fox'</span>
-  <span class="k">AND</span> region = <span class="s">'us'</span>;</pre>
-<pre data-l="py" hidden>df.write.format(<span class="s">"indextables"</span>) \
-  .option(<span class="s">"spark.indextables.indexing.typemap.title"</span>, <span class="s">"text"</span>) \
-  .partitionBy(<span class="s">"region"</span>).mode(<span class="s">"append"</span>) \
-  .save(<span class="s">"s3://my-bucket/docs"</span>)
+events.where(<span class="s">"message indexquery 'timeout'"</span>) \   <span class="c"># text search</span>
+      .where(<span class="s">"service = 'checkout'"</span>) \           <span class="c"># exact match</span>
+      .where(<span class="s">"ts >= '2026-11-17 09:00'"</span>) \       <span class="c"># range</span>
+      .select(<span class="s">"ts"</span>, <span class="s">"host"</span>, <span class="s">"message"</span>).show()</pre>
+<pre data-l="scala" hidden><span class="k">val</span> events = spark.read.format(<span class="s">"indextables"</span>)
+  .load(<span class="s">"s3://my-bucket/events"</span>)
 
-docs = spark.read.format(<span class="s">"indextables"</span>).load(<span class="s">"s3://my-bucket/docs"</span>)
-docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</span>) \
-    .select(<span class="s">"id"</span>, <span class="s">"title"</span>).show()</pre>
-<pre data-l="scala" hidden>df.write.format(<span class="s">"indextables"</span>)
-  .option(<span class="s">"spark.indextables.indexing.typemap.title"</span>, <span class="s">"text"</span>)
-  .partitionBy(<span class="s">"region"</span>).mode(<span class="s">"append"</span>)
-  .save(<span class="s">"s3://my-bucket/docs"</span>)
-
-<span class="k">val</span> docs = spark.read.format(<span class="s">"indextables"</span>).load(<span class="s">"s3://my-bucket/docs"</span>)
-docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</span>)
-    .select(<span class="s">"id"</span>, <span class="s">"title"</span>).show()</pre>
-<pre data-l="df" hidden><span class="c">-- DataFusion SQL: same table, same index</span>
-<span class="k">CREATE EXTERNAL TABLE</span> docs
-<span class="k">STORED AS</span> INDEXTABLES
-<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/docs'</span>;
-
-<span class="k">SELECT</span> id, title <span class="k">FROM</span> docs
-<span class="k">WHERE</span> <span class="k">indexquery</span>(title, <span class="s">'quick fox'</span>)
-  <span class="k">AND</span> region = <span class="s">'us'</span>;</pre>
-<pre class="out">+---+---------------------+
-| id| title               |
-+---+---------------------+
-|  1| The <span class="hit">quick</span> brown <span class="hit">fox</span> |
-|  2| <span class="hit">quick</span> <span class="hit">fox</span> jumps     |
-+---+---------------------+</pre>
+events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span class="c">// text search</span>
+      .where(<span class="s">"service = 'checkout'"</span>)           <span class="c">// exact match</span>
+      .where(<span class="s">"ts >= '2026-11-17 09:00'"</span>)       <span class="c">// range</span>
+      .select(<span class="s">"ts"</span>, <span class="s">"host"</span>, <span class="s">"message"</span>).show()</pre>
+<pre data-l="df" hidden><span class="k">SELECT</span> ts, host, message <span class="k">FROM</span> events
+<span class="k">WHERE</span> <span class="k">indexquery</span>(message, <span class="s">'timeout'</span>)      <span class="c">-- text search</span>
+  <span class="k">AND</span> service = <span class="s">'checkout'</span>              <span class="c">-- exact match</span>
+  <span class="k">AND</span> ts >= <span class="s">'2026-11-17 09:00'</span>;        <span class="c">-- range</span></pre>
+<pre class="out">+----------+-------+---------------------------+
+| ts       | host  | message                   |
++----------+-------+---------------------------+
+| 09:02:11 | web-7 | upstream <span class="hit">timeout</span> after 30s |
+| 09:02:14 | web-3 | payment gateway <span class="hit">timeout</span>   |
++----------+-------+---------------------------+</pre>
     </div>
   </div></div>
 
@@ -252,6 +246,14 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
       <div><div class="n">2</div><h3>Commit it in a transaction log</h3><p>Each write is one atomic commit. Readers always see a consistent snapshot.</p></div>
       <div><div class="n">3</div><h3>Search from your engine</h3><p>Spark executors, or a DataFusion process, open only the splits and bytes a query needs. No server sits in between.</p></div>
     </div>
+    <h3 class="modes-h">What the index answers</h3>
+    <div class="modes four">
+      <div><div class="who">Text search</div><p class="q">message indexquery '"connection reset" AND NOT retry'</p><p>Words, phrases and boolean logic inside text.</p></div>
+      <div><div class="who">Exact match</div><p class="q">user_id = 'u-48213'</p><p>One value among billions of rows.</p></div>
+      <div><div class="who">Range</div><p class="q">ts BETWEEN '09:00' AND '09:15'</p><p>Times, numbers and dates between two bounds.</p></div>
+      <div><div class="who">Counts and totals</div><p class="q">SELECT status, count(*) … GROUP BY status</p><p>Aggregates computed from the index, without fetching rows.</p></div>
+    </div>
+    <p class="sub" style="font-size:14px;margin-top:10px">Exact match, range and aggregates are ordinary SQL. Only text search needs the <code>indexquery</code> operator, and all four combine in one query.</p>
     <h3 class="modes-h">Two kinds of table, one way to query</h3>
     <div class="modes">
       <div><div class="who">Standalone table</div><h3>The index is the table</h3><p>Write rows to IndexTables and it stores both the data and the index. Use it when search is the main job of the data: logs, events, documents.</p><a class="go" href="#start">Create a table →</a></div>
@@ -319,8 +321,8 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
   <div class="eyebrow">Why IndexTables</div>
   <h1>Search without a second <mark>system</mark></h1>
   <p class="sub">For people deciding whether this belongs in their platform.</p>
-  <p>Most teams that need text search over large data run a search cluster beside their lakehouse and copy data into it. That means two copies, two security models and a pipeline between them.</p>
-  <p>IndexTables keeps the index in your object storage, in an open table layout, and lets the engine you already run do the searching.</p>
+  <p>Lakehouse tables are built for scans. Finding one user, one hour or one phrase means reading far more data than the answer contains. Most teams that need fast lookups or text search over large data run a search cluster beside their lakehouse and copy data into it. That means two copies, two security models and a pipeline between them.</p>
+  <p>IndexTables keeps the index in your object storage, in an open table layout, and lets the engine you already run do the searching: text, exact match, ranges and aggregates.</p>
   <table><tr><th>You want</th><th>Good fit?</th></tr>
   <tr><td>Keyword and phrase search over logs, events or documents already in a lakehouse</td><td><span class="badge b-ok">Yes</span></td></tr>
   <tr><td>Search combined with SQL joins and aggregates in one query</td><td><span class="badge b-ok">Yes</span></td></tr>
