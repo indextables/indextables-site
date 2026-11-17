@@ -93,9 +93,10 @@ This follows the tutorials / how-to / explanation / reference split that most we
 1. **One sentence and one example.** "Full-text search on lakehouse tables, inside Spark. No search cluster." Beside it, a tabbed example (SQL, PySpark, Scala) that writes a table and searches it.
 2. **Choose your path.** Five cards by role, each going to a different starting page.
 3. **How it works in three steps.** Write an index beside your data; commit it in a transaction log; executors search it directly from object storage.
-4. **What you can do today.** The availability matrix, generated, with planned items marked as planned.
-5. **Documentation you can check.** A short explanation that every reference statement cites a numbered requirement, with a live spec chip to click.
-6. **Latest from the blog** and the footer.
+4. **Watch the talk.** The 36-minute conference presentation (section 5.5), with a short chapter list beside it.
+5. **What you can do today.** The availability matrix, generated, with planned items marked as planned.
+6. **Documentation you can check.** A short explanation that every reference statement cites a numbered requirement, with a live spec chip to click.
+7. **Latest from the blog** and the footer.
 
 ### 5.3 Page inventory
 
@@ -109,6 +110,7 @@ Class: G = generated, D = derived from cited specs, A = authored (see the sync p
 | Use cases (log and event search, security investigation, text search on lakehouse tables) | A | HLD Target Users | home page |
 | How it compares (search servers; plain Parquet scans; Delta and Iceberg alone) | A | HLD Non-Goals, Tenets | why-indextables |
 | When not to use it | A | HLD Non-Goals | new |
+| Talks and videos | A | none (section 5.5) | new |
 | Design principles | D | HLD Tenets | new |
 | FAQ | A + D | HLD, README | new |
 
@@ -209,7 +211,26 @@ All six posts move with their dates, authors, tags and images.
 
 Slugs are unchanged, so existing links and feed subscribers keep working. Posts are historical records and are not rewritten; the banner says which product line a post describes and points to the current page. Internal links in posts that point at old doc URLs are covered by the redirects below. Two new posts are suggested for launch: "Why we rebuilt IndexTables" and "Documentation you can check".
 
-### 5.5 Redirects from the old site
+### 5.5 Conference talk
+
+"1000× Faster Retrieval: Indexed and Full-Text Search in the Lakehouse" by Scott Schenkein ([YouTube](https://www.youtube.com/watch?v=PqLCqE4zOY0), published by Databricks Events on 2026-06-26, 36 minutes) is the best single introduction for a visitor who would rather watch than read. It appears in three places:
+
+| Where | How |
+|---|---|
+| Home page | A "Watch the talk" section after "How it works": the video and five chapter links |
+| Why / Talks and videos | The video with its full chapter list. Each chapter links to the video at that timestamp and to the page that covers the same topic (for example "Index Query Operator" to the IndexQuery guide, "Companion Mode" to the companion concept page, "Pre-Warming NVMe Cache" to the caching guide) |
+| Learn / IndexTables in plain English, and What is IndexTables | A one-line "Prefer to watch?" link |
+
+Rules for the embed:
+
+- The player loads only when the visitor clicks. Until then the page shows a still image and a play button, so no YouTube script or cookie is loaded on page view, and the click uses the `youtube-nocookie.com` player. This keeps the home page inside its performance budget.
+- A plain link to YouTube sits beside the player for visitors who block embeds.
+- The talk describes the 0.5.x line, including its benchmark figures. Like the migrated blog posts, it carries a note saying so and pointing to the current availability matrix. The site does not restate the talk's performance numbers as claims about the cleanroom until they are re-measured.
+- The page is authored, cites no upstream specs and is outside drift detection. The chapter links to site pages are covered by the ordinary link check.
+
+The Talks and videos page is a list, so later recordings are added as entries without a layout change.
+
+### 5.6 Redirects from the old site
 
 Every old URL gets a permanent redirect, generated from one reviewed map and checked in CI. Examples:
 

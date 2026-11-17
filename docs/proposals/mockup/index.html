@@ -92,6 +92,14 @@ th{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color
 .posts{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--rule);margin-top:22px}
 .posts a{padding:18px 20px 18px 0;text-decoration:none;color:var(--ink);border-bottom:1px solid var(--rule)}
 .posts time{font:12px var(--mono);color:var(--muted)} .posts h3{margin:.3em 0;font-size:1.1rem} .posts a:hover h3{color:var(--accent)}
+.vid{position:relative;aspect-ratio:16/9;background:#12161C center/cover no-repeat;border:1px solid var(--ink);box-shadow:6px 6px 0 var(--rule);cursor:pointer;display:block;width:100%;padding:0}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vid .play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;background:var(--hl);border:2px solid #161B22;display:grid;place-items:center}
+.vid .play::after{content:"";border-left:22px solid #161B22;border-top:14px solid transparent;border-bottom:14px solid transparent;margin-left:6px}
+.vid .len{position:absolute;right:10px;bottom:10px;background:#12161C;color:#fff;font:12px var(--mono);padding:2px 6px}
+.chap{list-style:none;padding:0;margin:14px 0;border-top:1px solid var(--rule);font-size:14.5px}
+.chap li{display:grid;grid-template-columns:54px 1fr auto;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.chap .t{font:12.5px var(--mono);color:var(--accent);text-decoration:none}.chap .d{font-size:13px;white-space:nowrap}
 footer{padding:36px 0 60px;color:var(--muted);font-size:14px}
 footer .cols{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:24px}
 footer h4{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--ink);margin:0 0 8px}
@@ -224,6 +232,23 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
     </div>
   </div></section>
 
+  <section class="band"><div class="wrap two">
+    <button class="vid" data-yt="PqLCqE4zOY0" style="background-image:url(https://i.ytimg.com/vi/PqLCqE4zOY0/hqdefault.jpg)" aria-label="Play: 1000× Faster Retrieval"><span class="play"></span><span class="len">36:06</span></button>
+    <div>
+      <div class="eyebrow">Conference talk · 36 min</div>
+      <h2>Prefer to <mark>watch</mark>?</h2>
+      <p class="sub">"1000× Faster Retrieval: Indexed and Full-Text Search in the Lakehouse", presented by Scott Schenkein.</p>
+      <ul class="chap">
+        <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=58s">00:58</a><span>The painful reality of full-table scans</span></li>
+        <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=652s">10:52</a><span>Introducing IndexTables</span></li>
+        <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=1131s">18:51</a><span>The IndexQuery operator</span></li>
+        <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=1261s">21:01</a><span>Companion mode for existing tables</span></li>
+        <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=1389s">23:09</a><span>Making the performance concrete</span></li>
+      </ul>
+      <p style="font-size:14px"><a href="#why">All chapters, linked to the docs →</a></p>
+    </div>
+  </div></section>
+
   <section class="band"><div class="wrap">
     <h2>What you can do <mark>today</mark></h2>
     <p class="sub">This table is generated from the project's requirement status, not written by hand.</p>
@@ -274,6 +299,18 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
   <tr><td>Search combined with SQL joins and aggregates in one query</td><td><span class="badge b-ok">Yes</span></td></tr>
   <tr><td>An always-on search API serving end users at millisecond latency</td><td><span class="badge b-def">Not the goal</span></td></tr>
   <tr><td>Tables on HDFS</td><td><span class="badge b-def">Not supported</span></td></tr></table>
+  <h2 id="talk" style="margin-top:1.8em">Talks and videos</h2>
+  <p><b>1000× Faster Retrieval: Indexed and Full-Text Search in the Lakehouse</b><br><span style="color:var(--muted);font-size:.95rem">Scott Schenkein · published 2026-06-26 · 36 min · <a href="https://www.youtube.com/watch?v=PqLCqE4zOY0">open on YouTube</a></span></p>
+  <button class="vid" data-yt="PqLCqE4zOY0" style="background-image:url(https://i.ytimg.com/vi/PqLCqE4zOY0/hqdefault.jpg)" aria-label="Play: 1000× Faster Retrieval"><span class="play"></span><span class="len">36:06</span></button>
+  <div class="banner" style="font-size:.9rem;margin-top:22px"><b>Recorded before the rebuild.</b> The talk and its benchmark figures describe the 0.5.x line. See <a href="#home">what is available today</a>.</div>
+  <ul class="chap" style="font-size:.95rem">
+    <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=106s">01:46</a><span>Workload mismatch: analytics vs retrieval</span><a class="d" href="#why">What is IndexTables</a></li>
+    <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=459s">07:39</a><span>Bloom filters, partitioning and Z-ordering trade-offs</span><a class="d" href="#why">How it compares</a></li>
+    <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=1000s">16:40</a><span>Architecture: Spark as the front door</span><a class="d" href="#guide">Concepts: architecture</a></li>
+    <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=1131s">18:51</a><span>IndexQuery operator for search syntax</span><a class="d" href="#guide">IndexQuery cookbook</a></li>
+    <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=1261s">21:01</a><span>Companion mode for existing lakehouse tables</span><a class="d" href="#guide">Concepts: companions</a></li>
+    <li><a class="t" href="https://www.youtube.com/watch?v=PqLCqE4zOY0&t=1692s">28:12</a><span>Pre-warming the NVMe cache</span><a class="d" href="#guide">Caching and prewarm</a></li>
+  </ul>
   <div class="next"><a href="#learn"><small>Next</small>IndexTables in plain English</a><a href="#start"><small>Or</small>Try the quickstart</a></div>
 </div></main>
 
@@ -281,7 +318,7 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
 <main class="view" id="v-learn"><div class="learn">
   <div class="eyebrow">Learn · 6 minute read · no search background needed</div>
   <h1>IndexTables in plain <mark>English</mark></h1>
-  <p class="sub">What an index is, where IndexTables keeps it, and why that saves you a cluster.</p>
+  <p class="sub">What an index is, where IndexTables keeps it, and why that saves you a cluster. Prefer to watch? <a href="#why">See the 36-minute talk.</a></p>
   <p>Imagine a thousand-page book with no index at the back. To find every mention of "invoice" you read every page. That is what a query engine does when it scans files for a word.</p>
   <p>An <span class="tip" title="Glossary: a lookup from each word to the rows that contain it">inverted index</span> is the index at the back of the book: for each word, the list of places it appears.</p>
   <figure class="fig" style="margin-left:0;margin-right:0">
@@ -394,7 +431,7 @@ docs.where(<span class="s">"title indexquery 'quick fox' AND region = 'us'"</spa
 
 <footer><div class="wrap cols">
   <div><div class="brand" style="margin-bottom:8px">IndexTables</div>Open source search for the lakehouse.<br>Docs verified against upstream <code>e947724</code>.</div>
-  <div><h4>Learn</h4><a href="#why">Why IndexTables</a><a href="#learn">Plain English</a><a href="#start">Quickstart</a></div>
+  <div><h4>Learn</h4><a href="#why">Why IndexTables</a><a href="#why">Talks and videos</a><a href="#learn">Plain English</a><a href="#start">Quickstart</a></div>
   <div><h4>Docs</h4><a href="#guide">Guides</a><a href="#guide">Concepts</a><a href="#ref">Reference</a></div>
   <div><h4>Project</h4><a href="#ref">Status and roadmap</a><a href="#guide">How it is built (LID)</a><a href="#ref">Specification</a></div>
   <div><h4>Community</h4><a href="#blog">Blog</a><a href="#home">GitHub</a><a href="#home">Contributing</a></div>
@@ -427,6 +464,7 @@ function openS(){ov.classList.add('on');document.getElementById('si').focus()}
 document.getElementById('sbtn').onclick=openS;
 ov.onclick=e=>{if(e.target===ov)ov.classList.remove('on')};
 addEventListener('keydown',e=>{if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();openS()}if(e.key==='Escape')ov.classList.remove('on')});
+document.querySelectorAll('.vid').forEach(v=>v.onclick=()=>{v.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+v.dataset.yt+'?autoplay=1" title="1000× Faster Retrieval" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>'});
 let area='';const q=document.getElementById('q');
 function filt(){const t=q.value.toLowerCase();document.querySelectorAll('#keys tr[data-a]').forEach(r=>{
   r.style.display=(!area||r.dataset.a===area)&&r.textContent.toLowerCase().includes(t)?'':'none'})}
