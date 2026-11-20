@@ -12,3 +12,4 @@
 - [x] **SITE-UI-TALK-002**: The talk embed shall show a link to the video on YouTube, chapter links with timestamps, and a statement that the talk describes IndexTables 0.5.x.
 - [x] **SITE-UI-HOME-001**: The home page shall show one example in Spark SQL, PySpark, Scala and DataFusion that combines a text match, an exact match and a range, and shall present standalone and companion tables side by side.
 - [x] **SITE-UI-NAV-001**: Every page, including the home page, shall show in its header links to the Why, Learn, Get started, Guides, Concepts, Reference and Blog sections, with the current section marked; on narrow screens the home page shall instead show a list of those sections above its footer.
+- [x] **SITE-UI-FONT-001**: The site shall serve its fonts from its own origin and shall request no font or stylesheet from another host.

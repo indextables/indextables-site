@@ -4,6 +4,8 @@ description: Every database has indexes.
 slug: blog/companion-mode-0.5.0
 date: '2026-02-16'
 legacy: true
+authors: [Scott Schenkein]
+tags: [release, companion-mode, delta-lake, iceberg, parquet]
 sidebar:
   label: 'Search Is an Index, Not a Copy: Introducing Comp'
   order: 79739783

@@ -4,6 +4,8 @@ description: We're excited to announce the release of IndexTables 0.4.5, a miles
 slug: blog/announcing-0.4.5
 date: '2026-02-02'
 legacy: true
+authors: [IndexTables Team]
+tags: [announcement, release]
 sidebar:
   label: Announcing IndexTables 0.4.5
   order: 79739797

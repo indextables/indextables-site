@@ -44,5 +44,5 @@ The presentation video is shown as a poster that loads the player from `youtube-
 
 | Decision | Chosen | Rejected and why |
 |---|---|---|
-| Fonts | Loaded from Google Fonts with system fallbacks | Self-hosting is better for privacy and is a follow-up; it does not change the design |
+| Fonts | Served from this site, as variable fonts from the `@fontsource-variable` packages, with system fallbacks | A font service sends every reader's address to a third party and adds a connection before text renders |
 | Video | Click to load | An eager embed loads third-party scripts and cookies on the home page |

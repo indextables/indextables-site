@@ -4,6 +4,8 @@ description: IndexTables 0.5.4 introduces streaming companion synchronization, u
 slug: blog/release-0.5.4
 date: '2026-03-15'
 legacy: true
+authors: [Scott Schenkein]
+tags: [release, companion-mode, arrow-ffi, memory-management, streaming]
 sidebar:
   label: IndexTables 0.5.4
   order: 79739684

@@ -1,5 +1,5 @@
 /* @spec SITE-UI-THEME-001, SITE-UI-THEME-002 */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Fonts are served from this site: the @fontsource packages are listed in astro.config.mjs. */
 
 :root[data-theme='light'] {
   --paper: #FAF7F0; --card: #FFFFFF; --ink: #12161C; --muted: #5B6573; --rule: #E2DCCD;
@@ -21,9 +21,9 @@
   --sl-color-accent: var(--accent); --sl-color-accent-high: #F7B9A7; --sl-color-accent-low: #4A2218; --sl-color-text-accent: var(--accent);
 }
 :root {
-  --sl-font: 'Inter', system-ui, sans-serif;
-  --sl-font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --serif: 'Fraunces', Georgia, serif;
+  --sl-font: 'Inter Variable', system-ui, sans-serif;
+  --sl-font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --serif: 'Fraunces Variable', Georgia, serif;
   --sl-content-width: 46rem;
 }
 h1, h2, h3, .site-title { font-family: var(--serif); font-weight: 600; letter-spacing: -0.01em; }

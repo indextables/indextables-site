@@ -4,6 +4,8 @@ description: We're excited to launch the official IndexTables website — and to
 slug: blog/welcome
 date: '2026-01-02'
 legacy: true
+authors: [IndexTables Team]
+tags: [announcement, mission]
 sidebar:
   label: Your Fast Search Data Should Be Yours
   order: 79739897

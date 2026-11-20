@@ -1,19 +1,19 @@
 name: pages
-# Publishes one branch to GitHub Pages for review. Pages serves the site at the root of the
-# custom domain set in the repository's Pages settings.
+# Publishes main, and only main, to GitHub Pages. Work branches are reviewed from a local build.
 on:
   workflow_dispatch:
   push:
-    branches: [main, 'devin/*-site-build']
+    branches: [main]
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -23,9 +23,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: npm run check
       - run: npm run build
-      - run: printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
-        if: github.ref != 'refs/heads/main'
+      - run: npm run check -- --dist
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
       - id: deploy

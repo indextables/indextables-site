@@ -19,14 +19,21 @@ The adapter is a `TableProvider` for DataFusion. Filters, `indexquery` and simpl
 
 1. **Add the crate.**
 
-   The crate is `indextables-datafusion`, in `native/datafusion` of the [product repository](https://github.com/indextables/indextables). Until it is published, depend on it by git or path, and use the DataFusion version its workspace pins.
+   The crate is `indextables-datafusion`, in `native/datafusion` of the [product repository](https://github.com/indextables/indextables). It needs Rust 1.95.0 or later and exactly the DataFusion version its workspace pins.
 
    ```toml
+   [package]
+   rust-version = "1.95.0"
+
    [dependencies]
    indextables-datafusion = { git = "https://github.com/indextables/indextables" }
-   datafusion = "55"
+   datafusion = { version = "=55.2.0", default-features = false }
    tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
    ```
+
+   :::caution[Subject to change]
+   The crate is not published yet, and the way to depend on it will change before the first release. The workspace builds against patched forks of some of its dependencies, and a project that depends on the crate by git does not inherit those patches today.
+   :::
 
 2. **Register the process host.**
 

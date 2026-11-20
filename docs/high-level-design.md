@@ -38,10 +38,14 @@ The site is a static site whose content is downstream of the product's arrow of 
 
 ## Non-goals
 
-- Documenting IndexTables 0.5.x. Old blog posts are kept and labelled; a migration guide covers the move.
+- Maintaining documentation for IndexTables 0.5.x. Its blog posts and documentation are archived unchanged and labelled (the documentation under `/0.5/`); a migration guide covers the move.
 - Publishing performance numbers before upstream has measured them.
 - Versioned documentation, until the product has a second release.
 - Choosing the agent that redrafts derived pages. The sync produces a report any agent or person can act on.
+
+## Publication
+
+The site is published at `www.indextables.io` from `main` only. It launches once the product repository is public under Apache-2.0 and initial performance testing shows no regression against 0.5.x. Every address in the 0.5.x site's sitemap keeps working, as a page or a redirect, and the blog feeds stay at their addresses. The site's code is Apache-2.0.
 
 ## System design
 

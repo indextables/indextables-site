@@ -6,7 +6,7 @@ The website and documentation for [IndexTables](https://github.com/indextables/i
 npm ci
 npm run dev        # local preview
 npm run build      # static site in dist/, with a .md for every page, llms.txt and llms-full.txt
-npm run check      # citations, fingerprints, links; add `-- --dist` after a build for Markdown parity
+npm run check      # citations, fingerprints, links, redirects, generated pages unedited; add `-- --dist` after a build for Markdown parity
 npm test
 ```
 
@@ -25,3 +25,7 @@ npm run check -- --stamp
 ```
 
 Start with `AGENTS.md` and `docs/high-level-design.md`.
+
+## Licence
+
+Apache License 2.0; see `LICENSE`. The blog posts and the `/0.5/` archive come from the Apache-2.0 `indextables_web` repository. See `CONTRIBUTING.md` and `SECURITY.md`.

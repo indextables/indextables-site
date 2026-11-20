@@ -5,7 +5,7 @@ import { short } from '../lib/upstream';
 
 const GROUPS: [string, string][] = [
   ['start/', 'Get started'], ['learn/', 'Learn'], ['why/', 'Why IndexTables'], ['guides/', 'Guides'],
-  ['concepts/', 'Concepts'], ['reference/', 'Reference'], ['blog/', 'Blog (written for 0.5.x)'],
+  ['concepts/', 'Concepts'], ['reference/', 'Reference'], ['blog/', 'Blog (written for 0.5.x)'], ['0.5/', 'Documentation of 0.5.x (archive, not the current version)'],
 ];
 export const GET: APIRoute = async ({ site }) => {
   const docs = (await getCollection('docs')).sort((a, b) => a.id.localeCompare(b.id));

@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import YAML from 'yaml';
-import { ROOT, DOCS, readLock, readSnapshot, status, resolveCitation, fingerprint } from './lib.mjs';
+import { ROOT, DOCS, GENERATED, sha256, readLock, readSnapshot, status, resolveCitation, fingerprint } from './lib.mjs';
 
 const dir = process.argv[2];
 if (!dir) { console.error('usage: generate.mjs <upstream-dir>'); process.exit(2); }
@@ -17,6 +17,7 @@ const snap = readSnapshot();
 const short = lock.commit.slice(0, 7);
 const blob = (p) => `https://github.com/${lock.repo}/blob/${lock.commit}/${p}`;
 
+const manifest = {};
 function write(rel, fm, body) {
   const lid = { class: 'generated', cites: fm.cites ?? [], reviewed: short };
   lid.fingerprint = fingerprint(lid, snap);
@@ -25,6 +26,9 @@ function write(rel, fm, body) {
   const file = join(DOCS, rel);
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, out);
+  // @spec SITE-GEN-CLEAN-001
+  manifest[rel] = sha256(out);
+  writeFileSync(GENERATED, JSON.stringify(manifest, null, 2) + '\n');
   console.log(`generated ${rel}`);
 }
 const esc = (s) => String(s).replace(/\|/g, '\\|').replace(/</g, '&lt;').replace(/\{/g, '&#123;');

@@ -1,5 +1,5 @@
 ---
-// @spec SITE-UI-META-001, SITE-UI-META-002, SITE-MD-LINK-001, SITE-CONT-LEGACY-001, SITE-CONT-VOL-002
+// @spec SITE-CONT-LEGACY-002, SITE-UI-META-001, SITE-UI-META-002, SITE-MD-LINK-001, SITE-CONT-LEGACY-001, SITE-CONT-VOL-002
 import { ENGINE } from '../lib/upstream';
 const { entry, id } = Astro.locals.starlightRoute;
 const d = entry.data as any;
@@ -14,6 +14,9 @@ const showMeta = d.template !== 'splash';
     <a class="md" href={mdHref}>View as Markdown</a>
   </div>
 )}
+{d.date && (
+  <p class="post-meta">{d.date.toISOString().slice(0, 10)}{d.authors.length > 0 && ` · ${d.authors.join(', ')}`}{d.tags.length > 0 && ` · ${d.tags.join(', ')}`}</p>
+)}
 {d.legacy && (
   <div class="legacy-note">This was written for IndexTables 0.5.x, before the rebuild. Commands, settings and figures may differ from the current version. See <a href="/guides/migrate/from-0-5/">Migrate from 0.5.x</a>.</div>
 )}
@@ -21,5 +24,6 @@ const showMeta = d.template !== 'splash';
   <div class="changing-note">This area is still changing upstream. The page states only what is settled; details are added when the work lands.</div>
 )}
 <style>
+  .post-meta { font: 500 .78rem var(--sl-font-mono); color: var(--muted); margin-top: .6rem; }
   h1 { margin-top: 1rem; font-size: var(--sl-text-h1); line-height: var(--sl-line-height-headings); font-weight: 600; color: var(--sl-color-white); }
 </style>

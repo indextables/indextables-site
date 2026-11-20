@@ -21,6 +21,8 @@ export const collections = {
         status: z.enum(['available', 'planned', 'deferred', 'changing']).default('available'),
         legacy: z.boolean().default(false),
         date: z.coerce.date().optional(),
+        authors: z.array(z.string()).default([]),
+        tags: z.array(z.string()).default([]),
       }),
     }),
   }),

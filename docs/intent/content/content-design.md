@@ -26,11 +26,25 @@ Upstream is still changing some areas. The site handles them by rule, not by jud
 
 ## Legacy content
 
-The six blog posts of the 0.5.x site are kept under `/blog/` with `legacy: true`, which shows a notice that the post predates the rebuild and links to the migration guide. Their text is not edited to match the current version.
+The six blog posts of the 0.5.x site are kept under `/blog/` with `legacy: true`, which shows a notice that the post predates the rebuild and links to the migration guide. Their text is not edited to match the current version. Each keeps its date, authors and tags, shown under the title. The posts had no images.
+
+The documentation of the 0.5.x site is archived under `/0.5/docs/`, at the same paths it had under `/docs/`, with the same notice. Archive pages are left out of site search and of `llms-full.txt`, so a reader or an agent looking for current behavior does not land on them; `llms.txt` lists them under a heading that says what they are.
+
+## Feeds
+
+`/blog/rss.xml` and `/blog/atom.xml` are the addresses the 0.5.x site used, so existing subscriptions continue. Entry identifiers are the old post addresses (without a trailing slash); a reader that already holds a post does not show it again.
 
 ## Redirects
 
-Paths of the 0.5.x site that have a counterpart redirect to it. Blog posts keep their slugs under `/blog/`.
+`data/legacy-sitemap.txt` is the sitemap of the 0.5.x site. `data/redirects.yaml` maps old paths to this site: a path with a current counterpart goes to it, a documentation path without one goes to its archived copy, and tag, author and archive listings go to the blog index. The site check fails if a sitemap path is neither a page nor a redirect. Blog posts keep their slugs and need no redirect.
+
+## Honest status
+
+A page marked `available` must rest on at least one implemented requirement. A page whose cited requirements are all open or deferred is marked `planned` or `deferred`.
+
+## Examples
+
+Examples are written from upstream designs, requirements and tests. Running the quickstart examples in CI against a product build is a launch criterion and needs read access to the product repository.
 
 ## Positioning rules
 

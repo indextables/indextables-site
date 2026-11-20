@@ -8,6 +8,8 @@ export const ROOT = new URL('..', import.meta.url).pathname;
 export const LOCK = join(ROOT, 'upstream/lock.yaml');
 export const SNAPSHOT = join(ROOT, 'upstream/snapshot/specs.json');
 export const DOCS = join(ROOT, 'src/content/docs');
+export const GENERATED = join(ROOT, 'upstream/snapshot/generated.json');
+export const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 const MARK = { x: 'implemented', ' ': 'gap', D: 'deferred' };
 const sha = (s, n = 12) => createHash('sha256').update(s).digest('hex').slice(0, n);
 

@@ -4,6 +4,8 @@ description: IndexTables 0.5.5 continues the shift toward a fully native executi
 slug: blog/release-0.5.5
 date: '2026-04-05'
 legacy: true
+authors: [Scott Schenkein]
+tags: [release, arrow-ffi, datasource, performance]
 sidebar:
   label: IndexTables 0.5.5
   order: 79739594

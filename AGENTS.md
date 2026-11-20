@@ -1,6 +1,6 @@
 # IndexTables Site
 
-The website and documentation for IndexTables, published at indextables.io. The product lives in [`indextables/indextables`](https://github.com/indextables/indextables) and is built with Linked-Intent Development (LID). This site is built the same way, and its pages cite the product's requirement IDs at one pinned commit.
+The website and documentation for IndexTables, published at www.indextables.io from `main` only. The product lives in [`indextables/indextables`](https://github.com/indextables/indextables) and is built with Linked-Intent Development (LID). This site is built the same way, and its pages cite the product's requirement IDs at one pinned commit.
 
 ## LID
 - Mode: Full

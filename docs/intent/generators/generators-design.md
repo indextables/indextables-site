@@ -20,6 +20,10 @@ Source: `data/availability.yaml`, a list of features with engines, cited upstrea
 
 One page listing every upstream segment with counts of implemented, open and deferred requirements, its requirement groups, and a link to the specs file at the pinned commit.
 
+## Hand edits
+
+The generator records a hash of every page it writes in `upstream/snapshot/generated.json`. The site check compares each generated page with its hash, so an edit made by hand fails the check without needing the product checkout.
+
 ## Decisions & Alternatives
 
 | Decision | Chosen | Rejected and why |

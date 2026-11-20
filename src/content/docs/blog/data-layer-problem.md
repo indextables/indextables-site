@@ -4,6 +4,8 @@ description: 'If you''ve spent any time in security leadership lately, you''ve p
 slug: blog/data-layer-problem
 date: '2026-04-04'
 legacy: true
+authors: [Scott Schenkein]
+tags: [security, architecture, data-infrastructure, ai]
 sidebar:
   label: The Data Layer Problem No One Is Talking About
   order: 79739595
