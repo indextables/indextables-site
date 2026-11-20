@@ -7,6 +7,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "logos": "node scripts/logos.mjs",
     "sync:snapshot": "node scripts/upstream-snapshot.mjs",
     "generate": "node scripts/generate.mjs",
     "check": "node scripts/site-check.mjs",

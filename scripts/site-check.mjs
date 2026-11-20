@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import YAML from 'yaml';
-import { ROOT, DOCS, GENERATED, sha256, walk, pages, readLock, readSnapshot, resolveCitation, fingerprint } from './lib.mjs';
+import { ROOT, DOCS, GENERATED, sha256, staleLogos, walk, pages, readLock, readSnapshot, resolveCitation, fingerprint } from './lib.mjs';
 
 const stamp = process.argv.includes('--stamp');
 const dist = process.argv.includes('--dist');
@@ -30,6 +30,24 @@ for (const d of ['scripts', 'src', 'tests']) {
     }
   }
 }
+
+// @spec SITE-UI-LOGO-003
+const logoSources = ['src/assets/logo.svg', 'src/assets/logo-dark.svg', 'src/assets/favicon.svg'];
+const logoRenders = ['public/logo.png', 'public/logo-dark.png', 'public/favicon.ico', 'public/apple-touch-icon.png'];
+const logoRecordPath = join(ROOT, 'src/assets/logos.json');
+if (!existsSync(logoRecordPath)) fail('src/assets/logos.json is missing; run npm run logos');
+else {
+  let logoRecord;
+  try { logoRecord = JSON.parse(readFileSync(logoRecordPath, 'utf8')); }
+  catch { fail('src/assets/logos.json is invalid; run npm run logos'); }
+  if (logoRecord) {
+    for (const source of logoSources)
+      if (!(source in logoRecord)) fail(`src/assets/logos.json is missing ${source}; run npm run logos`);
+    for (const source of staleLogos(logoRecord, (source) => readFileSync(join(ROOT, source), 'utf8')))
+      fail(`${source} changed since its PNG renders; run npm run logos`);
+  }
+}
+for (const render of logoRenders) if (!existsSync(join(ROOT, render))) fail(`${render} is missing; run npm run logos`);
 
 export const slugOf = (file) => relative(DOCS, file).replace(/\.mdx?$/, '').replace(/(^|\/)index$/, '');
 const all = pages();
@@ -92,13 +110,17 @@ for (const old of readFileSync(join(ROOT, 'data/legacy-sitemap.txt'), 'utf8').sp
 if (dist) {
   const out = join(ROOT, 'dist');
   if (!existsSync(out)) fail('dist/ does not exist; run the build first');
-  else for (const p of all) {
-    const s = slugOf(p.file);
-    const md = join(out, (s === '' ? 'index' : s) + '.md');
-    if (!existsSync(md)) { fail(`${p.rel}: no Markdown output`); continue; }
-    const text = readFileSync(md, 'utf8');
-    for (const c of p.data.lid?.cites ?? []) if (!text.includes(c)) fail(`${p.rel}: Markdown output lacks citation ${c}`);
-    if (/<\/?(Tabs|TabItem|Spec|Steps|Card|CardGrid|LinkCard|Aside)\b/.test(text.replace(/```[\s\S]*?```/g, ''))) fail(`${p.rel}: Markdown output contains a component tag`);
+  else {
+    // @spec SITE-UI-LOGO-002
+    for (const file of walk(out, (p) => p.endsWith('.svg'))) fail(`${relative(ROOT, file)}: SVG files are not allowed in dist/`);
+    for (const p of all) {
+      const s = slugOf(p.file);
+      const md = join(out, (s === '' ? 'index' : s) + '.md');
+      if (!existsSync(md)) { fail(`${p.rel}: no Markdown output`); continue; }
+      const text = readFileSync(md, 'utf8');
+      for (const c of p.data.lid?.cites ?? []) if (!text.includes(c)) fail(`${p.rel}: Markdown output lacks citation ${c}`);
+      if (/<\/?(Tabs|TabItem|Spec|Steps|Card|CardGrid|LinkCard|Aside)\b/.test(text.replace(/```[\s\S]*?```/g, ''))) fail(`${p.rel}: Markdown output contains a component tag`);
+    }
   }
 }
 
