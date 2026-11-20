@@ -6,6 +6,8 @@ on:
     branches: [main]
 permissions:
   contents: read
+  # deploy-pages lists this run's artifacts; in a private repository that needs actions: read.
+  actions: read
   pages: write
   id-token: write
 concurrency:
