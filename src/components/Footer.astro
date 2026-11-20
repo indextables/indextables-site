@@ -4,6 +4,8 @@ import Default from '@astrojs/starlight/components/Footer.astro';
 import Spec from './Spec.astro';
 import { short, repo, commit } from '../lib/upstream';
 const lid = (Astro.locals.starlightRoute.entry.data as any).lid;
+const rid = Astro.locals.starlightRoute.id;
+const mdHref = '/' + (rid === '' || rid === 'index' ? 'index' : rid.replace(/\/$/, '')) + '.md';
 const reviewed = lid?.reviewed ?? short;
 ---
 {lid && lid.cites.length > 0 && (
@@ -14,4 +16,4 @@ const reviewed = lid?.reviewed ?? short;
   </div>
 )}
 <Default><slot /></Default>
-<p style="font-size:.8rem;color:var(--sl-color-gray-3);margin-top:1rem">For agents: <a href="/llms.txt">llms.txt</a> · every page is available as Markdown by adding <code>.md</code> to its address.</p>
+<p style="font-size:.8rem;color:var(--sl-color-gray-3);margin-top:1rem">For agents: <a href={mdHref}>this page as Markdown</a> · <a href="/llms.txt">llms.txt</a> · <a href="/llms-full.txt">llms-full.txt</a> · every page is available as Markdown by adding <code>.md</code> to its address.</p>
