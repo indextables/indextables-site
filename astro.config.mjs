@@ -16,7 +16,7 @@ export default defineConfig({
     starlight({
       title: 'IndexTables',
       description: 'Fast search and retrieval on lakehouse tables, inside your query engine.',
-      logo: { src: './src/assets/logo.svg', alt: '' },
+      logo: { light: './src/assets/logo.svg', dark: './src/assets/logo-dark.svg', alt: '' },
       favicon: '/favicon.svg',
       customCss: ['./src/styles/theme.css'],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/indextables/indextables' }],

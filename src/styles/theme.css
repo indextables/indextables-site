@@ -1,7 +1,7 @@
 /* @spec SITE-UI-THEME-001, SITE-UI-THEME-002 */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-:root, :root[data-theme='light'] {
+:root[data-theme='light'] {
   --paper: #FAF7F0; --card: #FFFFFF; --ink: #12161C; --muted: #5B6573; --rule: #E2DCCD;
   --accent: #C23A1E; --marker: #FFD84D; --ok: #2F7D4F; --plan: #8A5800; --defer: #5B6573;
   --sl-color-bg: var(--paper); --sl-color-bg-nav: var(--paper); --sl-color-bg-sidebar: var(--paper);
@@ -13,7 +13,9 @@
 }
 :root[data-theme='dark'] {
   --paper: #12161C; --card: #1A2029; --ink: #F3EFE6; --muted: #9AA3AF; --rule: #2C3440;
-  --accent: #F08A6E; --ok: #6FC08F; --plan: #E0B45A; --defer: #9AA3AF;
+  --accent: #F08A6E; --marker: #FFD84D; --ok: #6FC08F; --plan: #E0B45A; --defer: #9AA3AF;
+  --sl-color-text: #D8D3C7; --sl-color-gray-1: #EDE8DC; --sl-color-gray-2: #C9C4B8; --sl-color-gray-3: #9AA3AF;
+  --sl-color-gray-4: #6B7482; --sl-color-gray-5: #2C3440; --sl-color-gray-6: #1A2029; --sl-color-gray-7: #161B22;
   --sl-color-bg: var(--paper); --sl-color-bg-nav: var(--paper); --sl-color-bg-sidebar: var(--paper);
   --sl-color-white: var(--ink); --sl-color-black: var(--paper); --sl-color-hairline: var(--rule); --sl-color-hairline-light: var(--rule);
   --sl-color-accent: var(--accent); --sl-color-accent-high: #F7B9A7; --sl-color-accent-low: #4A2218; --sl-color-text-accent: var(--accent);
@@ -54,7 +56,7 @@ a.spec:hover { color: var(--accent); border-color: var(--accent); }
 .talk { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; margin-top: 1rem; }
 .talk-poster, .talk-frame { aspect-ratio: 16 / 9; width: 100%; border: 1px solid var(--rule); margin: 0; }
 .talk-poster { background: #12161C; color: #F3EFE6; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: .3rem; padding: 1.2rem; cursor: pointer; text-align: left; position: relative; }
-.talk-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%); width: 64px; height: 64px; background: var(--marker); color: #12161C; display: grid; place-items: center; font-size: 1.4rem; }
+.talk-play { margin-bottom: auto; width: 56px; height: 56px; background: var(--marker); color: #12161C; display: grid; place-items: center; font-size: 1.4rem; }
 .talk-title { font: 600 1.25rem var(--serif); }
 .talk-sub { font: 400 .72rem var(--sl-font-mono); opacity: .75; }
 .talk-side { font-size: .9rem; }
