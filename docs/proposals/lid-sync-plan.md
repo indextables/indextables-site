@@ -43,7 +43,7 @@ LID itself (1.4.x) defines no cross-repository construct that I could find; its 
 
 ### 3.1 Pin
 
-`upstream.lock.yaml` at the repo root:
+`upstream/lock.yaml`:
 
 ```yaml
 upstream:
@@ -58,7 +58,7 @@ CI fetches upstream at that commit with a sparse, blob-filtered clone limited to
 
 ### 3.2 Snapshot
 
-`tools/upstream/snapshot` parses the pinned checkout into `upstream/snapshot.json` (committed, so diffs are reviewable):
+`scripts/upstream-snapshot.mjs` parses the pinned checkout into `upstream/snapshot/specs.json` (committed, so diffs are reviewable):
 
 - per spec ID: marker, normalized text hash, file, line, section heading
 - per design doc: a hash per heading section
@@ -94,7 +94,7 @@ It renders as a small chip that opens the requirement text and links to the spec
 
 ### 3.4 Drift
 
-`tools/upstream/drift` compares each page's recorded fingerprint against the snapshot and classifies what it finds:
+`scripts/upstream-snapshot.mjs --drift` compares each page's recorded fingerprint against the snapshot and classifies what it finds:
 
 | Drift kind | Meaning | Default handling |
 |---|---|---|
@@ -248,25 +248,29 @@ The Markdown carries the same citations as the HTML, so an agent can check a sta
 
 ## 10. Rollout
 
-Site generation starts once upstream `scripts/spec-check.py` reports no active-gap (`[ ]`) spec. At `227e84f`, 21 remain, in `CORE-AGG-HASH`, `SPARK-SYNC-META`, `SPARK-MNT`, `CORE-OBS`, `CORE-QRY-OBS`, `DF-AD-HAR` and four other groups; the roadmap lists one slice (37) still to complete. The first pin is that commit, so the first drafting pass runs against settled intent and drift detection begins from a stable baseline.
+Generation and launch are separate.
+
+- **Generation** starts from a pinned upstream commit while some requirements are still open. Open requirements (`[ ]`) show as Planned and deferred ones (`[D]`) as Deferred, areas upstream names as still changing are held as short "changing" pages or generated, and the pin moves forward by the drift report. Expect re-pins when clustering lands (about 20 pages) and after each performance lane.
+- **Launch** (the first public deploy) waits for two things: `indextables/indextables` is public under Apache-2.0, and initial performance testing is complete with the benchmark grid showing no regression against 0.5.x. No performance figure appears on the site before the grid publishes.
 
 | Step | Result |
 |---|---|
-| 1. Gate | Upstream reports zero active-gap specs; that commit is recorded in `upstream.lock.yaml` |
+| 1. Pin | A commit on upstream `main` is recorded in `upstream/lock.yaml` |
 | 2. Bootstrap | LID installed in this repo (`AGENTS.md`, vendored workflow doc, HLD drafted from the approved proposals) |
 | 3. Link core | Lock file, snapshot, citation schema, `citations-resolve` and `fingerprints-current` checks |
 | 4. Generators | Configuration reference, per-engine availability matrix, specification browser, error catalog |
 | 5. First content | Getting started for Spark and DataFusion, and core guides, drafted against the pin with citations |
 | 6. Sync job | Scheduled job and rolling PR, without an agent step |
 | 7. Agent step | Plug in the chosen agent once you decide which |
-| 8. Versions | Switch from `next` to tagged versions at the first cleanroom release |
+| 8. Launch | Upstream public, benchmark grid shows no regression against 0.5.x; deploy from `main` only |
+| 9. Versions | Switch from `next` to tagged versions at the first cleanroom release |
 
 ## 11. Risks and open items
 
 | Item | Why it matters | Proposed handling |
 |---|---|---|
-| Upstream is private today | A public site would publish spec text and link to pages the public cannot open; CI needs a read credential | Until upstream is public: CI uses a read-only deploy key, spec chips show the requirement text but do not link out, and the specification browser is not published. Flip one setting when upstream opens. |
-| Upstream churn | Specs change many times a day during the cleanroom build | Generation waits for zero active-gap specs (section 10); after that, the rolling PR and group-level citations keep the number of stale pages proportional to real change |
+| Upstream is private until launch | Spec chips and the specification browser link to pages the public cannot open yet; the scheduled drift job needs a read credential | Upstream becomes public under Apache-2.0 before the site launches, so spec chips link out and the specification browser is published. Nothing is deployed publicly before then. Until then the scheduled drift job uses a read-only deploy key or is run by hand. |
+| Upstream churn | Specs change during the cleanroom build | Group-level citations keep the number of stale pages proportional to real change; volatile areas are generated or held as "changing" pages; the pin moves by the drift report |
 | Citation granularity | Too coarse makes every page stale constantly; too fine misses new behavior | Group citations by default, single IDs for specific claims; tune with real drift data after the first content step |
 | Parsing design-doc tables | A reformatted table breaks a generator | Shape check fails loudly; longer term, the upstream export in section 12 |
 | Agent drafting quality | A fluent but wrong paragraph is worse than a missing one | Claims need a `<Spec>` chip or sit under a page-level citation; `availability-honest`; tutorials execute; you review |

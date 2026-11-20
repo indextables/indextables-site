@@ -212,7 +212,7 @@ All six posts move with their dates, authors, tags and images.
 | The Data Layer Problem No One Is Talking About (2026-04-04) | `/blog/data-layer-problem` | Kept as written |
 | IndexTables 0.5.5 (2026-04-05) | `/blog/release-0.5.5` | Banner |
 
-Slugs are unchanged, so existing links and feed subscribers keep working. Posts are historical records and are not rewritten; the banner says which product line a post describes and points to the current page. Internal links in posts that point at old doc URLs are covered by the redirects below. Two new posts are suggested for launch: "Why we rebuilt IndexTables" and "Documentation you can check".
+Slugs are unchanged, and the RSS and Atom feeds stay at `/blog/rss.xml` and `/blog/atom.xml`, so existing links and feed subscribers keep working. Posts are historical records and are not rewritten; the banner says which product line a post describes and points to the current page. Internal links in posts that point at old doc URLs are covered by the redirects below. Two new posts are suggested for launch: "Why we rebuilt IndexTables" and "Documentation you can check".
 
 ### 5.5 Conference talk
 
@@ -235,7 +235,7 @@ The Talks and videos page is a list, so later recordings are added as entries wi
 
 ### 5.6 Redirects from the old site
 
-Every old URL gets a permanent redirect, generated from one reviewed map and checked in CI. Examples:
+Every URL in the live site's sitemap (about 60) gets a redirect, generated from one reviewed map and checked in CI. The 0.5.x documentation is archived under `/0.5/`, each page marked as describing the 0.5.x line; an old doc URL with no direct successor redirects to its archived copy. Examples:
 
 | Old | New |
 |---|---|
@@ -375,59 +375,67 @@ Spec chip; availability badge; synced language tabs; "who this is for" header; s
 ```
 indextables-site/
   AGENTS.md                      LID directives, link to upstream arrow
-  upstream.lock.yaml             pinned upstream commit
+  astro.config.mjs               site configuration, sidebar, redirects
+  upstream/
+    lock.yaml                    pinned upstream commit
+    snapshot/specs.json          parsed upstream arrow at the pin
+  data/                          inputs to generated pages (availability rows)
   docs/
     high-level-design.md         site HLD
     intent/<segment>/            site LLDs and EARS specs
-    arrows/                      overlay, upstream-map.yaml
-    lid/                         vendored workflow doc, sync-workflow.md
+    arrows/                      overlay
+    lid/                         vendored workflow doc
     proposals/                   these documents
-  site/
-    src/content/                 pages (MDX) by area: why, learn, start, guides, concepts, reference, blog
-    src/components/              spec chip, badges, tabs, …
-    src/pages/                   home and other custom pages
-    src/styles/                  design tokens
-  tools/
-    upstream/                    snapshot, drift
-    generators/                  one per generated page family
-    checks/                      the PR checks
+  src/
+    content/docs/                pages (Markdown, MDX) by area: why, learn, start, guides, concepts, reference, blog
+    components/                  spec chip, badges, talk, page title, footer
+    pages/                       Markdown and llms.txt endpoints
+    styles/                      design tokens
+  scripts/                       snapshot and drift, generators, site checks
+  tests/                         tests of the scripts
   examples/                      runnable tutorial code
-  upstream/snapshot.json         parsed upstream arrow at the pin
-  .github/workflows/             pr-checks, upstream-sync, deploy
+  .github/workflows/             ci, pages
 ```
 
-Hosting: GitHub Pages from this repository, on `indextables.io` (with `www` redirecting), deployed by a workflow on merge to `main`. Pull requests get a preview build. Search is Pagefind, built at deploy time, with no external service. Analytics, if wanted, should be a cookie-free service; none is assumed.
+Hosting: GitHub Pages from this repository. `www.indextables.io` is the canonical address and the apex redirects to it. The deploy workflow publishes `main` only; work branches are reviewed from a local build. Search is Pagefind, built at deploy time, with no external service. Analytics, if wanted, should be a cookie-free service; none is assumed.
 
 ## 9. Delivery sequence
 
-**The site is generated after the product's intent is fully implemented.** Generation starts when upstream `scripts/spec-check.py` reports no active-gap (`[ ]`) spec in any segment. The site pins that commit. Specs marked deferred (`[D]`) remain and are shown as Deferred.
+**Generation and launch are separate.** The site is built now, pinned to a commit on upstream `main`, with open requirements shown as Planned, deferred ones as Deferred, and areas upstream names as still changing either generated or held as short "changing" pages. The pin moves forward by the drift report; clustering and each performance lane will each need a re-pin.
 
-What the gate buys:
+**Launch waits for two things.** `indextables/indextables` is public under Apache-2.0, and initial performance testing is complete with the benchmark grid showing no regression against 0.5.x. The site carries no performance figure before the grid publishes.
 
-- Derived pages are drafted once, against settled specs, instead of being redrafted as slices land.
-- Executable tutorials can run against a real build from the first page.
-- At upstream `227e84f` (2026-11-20), 21 of 6,240 specs are active gaps and one roadmap slice remains.
-- The first published availability matrix has no "Planned" rows. The Planned badge stays in the design for requirements upstream adds after launch.
+Launch acceptance criteria, each a check or a reviewed list:
+
+- Every URL in the live sitemap redirects; the 0.5.x docs are archived under `/0.5/`.
+- The six blog posts keep their dates, authors, tags and images, and the feeds stay at `/blog/rss.xml` and `/blog/atom.xml`.
+- Fonts are self-hosted and subset.
+- Tutorial examples run in CI against a product build.
+- The site's code is licensed Apache-2.0, with `LICENSE`, `CONTRIBUTING.md` and `SECURITY.md`.
 
 | Stage | Contents | Depends on |
 |---|---|---|
 | 0 | Your decisions on these proposals | — |
-| Gate | Upstream reports zero active-gap specs; that commit becomes the pin | Upstream |
-| 1 | Site LID: `AGENTS.md`, HLD, LLDs and EARS written from the approved proposals | Gate |
+| 1 | Site LID: `AGENTS.md`, HLD, LLDs and EARS written from the approved proposals | Stage 0 |
 | 2 | Repository bootstrap: framework, design tokens, logo set, home page, blog and talk migration, redirects | Stage 1 |
 | 3 | Upstream link and generators (configuration, per-engine availability, specification browser) | Stage 1 |
 | 4 | Get started for Spark and for DataFusion, and Learn, with executable tutorials | Stages 2–3 |
 | 5 | Guides and Concepts, area by area, DataFusion guides included | Stage 3 |
 | 6 | Remaining Reference and the failure catalog | Stage 3 |
 | 7 | Sync job, then the agent step | Stage 3 |
-| 8 | Cut-over of indextables.io, timed with the cleanroom release | All |
+| 8 | Launch on www.indextables.io: upstream public, benchmark grid shows no regression against 0.5.x, acceptance criteria met | All |
 
 Stages 4 to 6 are the bulk of the work and parallelize well by documentation area.
 
-## 10. Decisions needed from you
+## 10. Decisions
 
-1. Framework: accept Astro with Starlight, or prefer Docusaurus.
-2. Visual direction: "the highlighted page", or one of the alternatives.
-3. Navigation labels and the page inventory: anything missing, or anything that should not be public.
-4. Upstream visibility: whether the specification browser and outbound spec links wait until `indextables/indextables` is public.
-5. Domain: replace indextables.io at cut-over, or run the new site on a preview address first.
+| Question | Decision |
+|---|---|
+| Framework | Astro with Starlight |
+| Visual direction and logo | "The highlighted page"; the grid logo replaces the old mark at launch |
+| Upstream visibility | `indextables/indextables` is public under Apache-2.0 before launch; spec links and the specification browser are kept |
+| Domain | `www.indextables.io` is canonical; the site replaces the old one at launch, with the 0.5.x docs archived under `/0.5/` |
+| Launch gate | After initial performance testing shows no regression against 0.5.x |
+| Deploys | `main` only |
+
+Open: whether agents become a named audience in the positioning, and the navigation labels and page inventory.
