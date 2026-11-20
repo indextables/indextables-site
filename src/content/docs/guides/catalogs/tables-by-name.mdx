@@ -1,0 +1,246 @@
+---
+title: Use tables by name
+description: Register, create, read, write, alter and drop IndexTables tables by name in Spark's session catalog, with every supported statement.
+sidebar: { order: 2 }
+lid:
+  reviewed: a865437
+  fingerprint: 9c0bafca3780
+  class: derived
+  cites: [SPARK-CAT-ENT, SPARK-CAT-RES, SPARK-CAT-DDL, SPARK-CAT-WR, SPARK-CAT-ALT, SPARK-CAT-DESC, SPARK-CAT-STR, SPARK-CAT-COMPAT]
+  docs: [spark/catalog/catalog-design.md#Entry Shape, spark/catalog/catalog-design.md#DDL and Writes by Name]
+engine: [spark]
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+IndexTables tables can be entries in Spark's session catalog, `spark_catalog`. This page shows every statement that works on them. Examples use a database `logs`.
+
+## Set-up
+
+Enable the session extension. On Spark 4.2 with Spark's built-in catalog, also set the IndexTables session-catalog wrapper:
+
+```text
+spark.sql.extensions=io.indextables.extensions.IndexTablesSparkExtensions
+# Spark 4.2 with the built-in catalog only:
+spark.sql.catalog.spark_catalog=io.indextables.spark.catalog.IndexTablesSessionCatalog
+```
+
+Spark 3.5 needs no catalog setting. If Delta's or Iceberg's session catalog is installed, leave it as it is; see [Beside Delta and Iceberg](/guides/catalogs/delta-and-iceberg/).
+
+## Register an existing table
+
+The table already exists at a location. Give it a name. No column list is needed: the schema comes from the table.
+
+```sql
+CREATE TABLE logs.events USING indextables
+LOCATION 's3://my-bucket/events';
+
+SELECT ts, message FROM logs.events
+WHERE message indexquery 'timeout';
+```
+
+## Create a new table
+
+<Tabs syncKey="lang">
+<TabItem label="Spark SQL">
+```sql
+-- Empty table with a column list
+CREATE TABLE logs.events (
+  ts TIMESTAMP, day DATE, service STRING, message STRING
+)
+USING indextables
+PARTITIONED BY (day)
+LOCATION 's3://my-bucket/events';
+
+-- From a query
+CREATE TABLE logs.errors
+USING indextables
+LOCATION 's3://my-bucket/errors'
+AS SELECT * FROM raw.logs WHERE level = 'ERROR';
+
+-- Only if the name is free
+CREATE TABLE IF NOT EXISTS logs.errors
+USING indextables
+LOCATION 's3://my-bucket/errors'
+AS SELECT * FROM raw.logs WHERE level = 'ERROR';
+```
+</TabItem>
+<TabItem label="PySpark">
+```python
+# saveAsTable
+(df.write.format("indextables")
+   .option("path", "s3://my-bucket/events")
+   .partitionBy("day")
+   .saveAsTable("logs.events"))
+
+# writeTo (DataFrameWriterV2)
+(df.writeTo("logs.events").using("indextables")
+   .tableProperty("location", "s3://my-bucket/events")
+   .partitionedBy("day")
+   .create())
+```
+</TabItem>
+<TabItem label="Scala">
+```scala
+// saveAsTable
+df.write.format("indextables")
+  .option("path", "s3://my-bucket/events")
+  .partitionBy("day")
+  .saveAsTable("logs.events")
+
+// writeTo (DataFrameWriterV2)
+df.writeTo("logs.events").using("indextables")
+  .tableProperty("location", "s3://my-bucket/events")
+  .partitionedBy($"day")
+  .create()
+```
+</TabItem>
+</Tabs>
+
+**A location is required.** Only external tables are supported, so every create names the table's root: SQL `LOCATION`, the writer's `path` option, or the `location` table property. A create over a location that already holds a table fails and points you to registering it instead.
+
+## Read
+
+```sql
+SELECT service, count(*) FROM logs.events
+WHERE message indexquery 'timeout' AND day = DATE '2026-11-01'
+GROUP BY service;
+```
+
+```python
+spark.table("logs.events").where("user_id = 'u-48213'").show()
+spark.readStream.table("logs.events")          # as a stream
+```
+
+## Write
+
+<Tabs syncKey="lang">
+<TabItem label="Spark SQL">
+```sql
+INSERT INTO logs.events SELECT * FROM staging.events;
+
+INSERT OVERWRITE logs.events SELECT * FROM staging.events;
+```
+</TabItem>
+<TabItem label="PySpark">
+```python
+df.write.format("indextables").mode("append").saveAsTable("logs.events")
+df.write.insertInto("logs.events")
+```
+</TabItem>
+<TabItem label="Scala">
+```scala
+df.write.format("indextables").mode("append").saveAsTable("logs.events")
+df.write.insertInto("logs.events")
+```
+</TabItem>
+</Tabs>
+
+## Replace
+
+<Tabs syncKey="lang">
+<TabItem label="Spark SQL">
+```sql
+REPLACE TABLE logs.errors
+USING indextables
+LOCATION 's3://my-bucket/errors'
+AS SELECT * FROM raw.logs WHERE level = 'ERROR';
+
+CREATE OR REPLACE TABLE logs.errors
+USING indextables
+LOCATION 's3://my-bucket/errors'
+AS SELECT * FROM raw.logs WHERE level IN ('ERROR', 'FATAL');
+```
+</TabItem>
+<TabItem label="PySpark">
+```python
+(df.writeTo("logs.errors").using("indextables")
+   .tableProperty("location", "s3://my-bucket/errors")
+   .createOrReplace())
+
+df.writeTo("logs.errors").using("indextables").replace()
+```
+</TabItem>
+</Tabs>
+
+Replacing an existing IndexTables table is a full overwrite of its root with the query's schema and partitioning. The table keeps its identity, so the entry stays valid. A replace over a name that holds a table of another format is refused before anything is dropped.
+
+`saveAsTable` in overwrite mode on an existing entry is refused on Spark 3.5, which would drop the entry first. Use `writeTo(…).replace()`, `REPLACE TABLE … AS SELECT` or `INSERT OVERWRITE`.
+
+## Inspect
+
+```sql
+DESCRIBE TABLE logs.events;
+DESCRIBE TABLE EXTENDED logs.events;
+SHOW COLUMNS IN logs.events;
+SHOW CREATE TABLE logs.events;
+SHOW TBLPROPERTIES logs.events;
+```
+
+Columns, types and partitioning are reported from the table's transaction log.
+
+## Rename, move and drop
+
+```sql
+ALTER TABLE logs.events RENAME TO logs.app_events;
+
+-- After moving the files to a new location
+ALTER TABLE logs.app_events SET LOCATION 's3://new-bucket/events';
+
+DROP TABLE logs.app_events;          -- removes the name; files are untouched
+DROP TABLE IF EXISTS logs.app_events;
+```
+
+**`DROP TABLE` removes the name only.** The table's files and transaction log stay where they are, with or without `PURGE`. To delete data, use [PURGE and the maintenance commands](/guides/maintenance/purge/) or delete the location.
+
+**`SET LOCATION` checks identity.** An entry pins the identity of the table it was created for. Pointing it at a location that holds a different table fails, naming both identities. Pointing it at a location with no table fails too.
+
+Cached data for an entry is cleared when a statement changes which table the name refers to, so a rename, move or drop never serves stale rows.
+
+## Use names in IndexTables commands
+
+Maintenance and operations commands take an unquoted name wherever they take a quoted path.
+
+```sql
+MERGE SPLITS logs.events WHERE day = '2026-11-01';
+DESCRIBE INDEXTABLES TRANSACTION LOG logs.events;
+PREWARM INDEXTABLES CACHE logs.events;
+```
+
+## Table properties
+
+```sql
+ALTER TABLE logs.events SET TBLPROPERTIES ('owner_team' = 'observability');
+ALTER TABLE logs.events UNSET TBLPROPERTIES ('owner_team');
+COMMENT ON TABLE logs.events IS 'Application events';
+```
+
+Your own properties are stored on the entry. Keys beginning with `indextables.` or `spark.indextables.` are refused: IndexTables settings are never read from a catalog entry. Set them on the session, on the operation, or in the table's own log.
+
+## What is refused
+
+Each of these fails before anything is changed, with an error that names the table and says what to do instead.
+
+| Statement | Why | Use instead |
+|---|---|---|
+| `TRUNCATE TABLE` | Spark's truncate deletes every file under the location, including the transaction log | `DROP INDEXTABLES PARTITIONS`, or an overwrite |
+| `ALTER TABLE … ADD`/`DROP`/`RENAME PARTITION`, `RECOVER PARTITIONS`, `MSCK REPAIR TABLE` | Partitions belong to the transaction log | `DROP INDEXTABLES PARTITIONS` |
+| `ALTER TABLE … ADD`/`DROP`/`RENAME`/`ALTER COLUMN`, `REPLACE COLUMNS` | The schema belongs to the transaction log | An overwrite with `overwriteSchema=true` |
+| `ANALYZE TABLE … COMPUTE STATISTICS` | Statistics are reported from the transaction log already | Nothing needed |
+| `DROP TABLE` on a **managed** entry | Dropping a managed entry would delete the table's files | `ALTER TABLE t SET TBLPROPERTIES ('EXTERNAL'='TRUE')`, then drop |
+| `ALTER TABLE … RENAME` on a managed entry | Renaming a managed entry moves the files | Convert to external first |
+| `DROP DATABASE … CASCADE` over a managed entry | As for `DROP TABLE` | Convert the listed entries to external first |
+| `writeTo(t).append()`, `overwrite(…)`, `overwritePartitions()` | Not available yet for existing entries | `INSERT INTO`, `INSERT OVERWRITE`, or `saveAsTable` in append mode |
+| `CREATE TABLE` without a location | Only external tables are supported | Add `LOCATION` |
+| `CREATE TABLE … LIKE` | Would copy a stored schema and could create a managed entry | `CREATE TABLE … USING indextables LOCATION` |
+| `REPLACE TABLE t (<columns>)` without `AS SELECT` | Spark runs it as a drop and a create | `REPLACE TABLE … AS SELECT` |
+| `CLUSTERED BY … INTO n BUCKETS`, `SORTED BY`, partition transforms such as `days(ts)`, column `DEFAULT`, generated or identity columns, `CONSTRAINT` | Not part of the table format | Plain columns and plain partition columns |
+
+### `insertInto` when another catalog is configured
+
+When the session also configures a named catalog, Spark can redirect a `DataFrameWriter.insertInto` to a different table than the one named. IndexTables refuses such a write to an existing entry unless you set `spark.indextables.catalog.allowDataFrameWriterInserts` to `true`. A write it can prove was redirected is always refused. SQL `INSERT INTO` is not affected.
+
+`ANALYZE TABLES` over a whole database skips IndexTables entries with a warning and analyses the rest.
+
+## Spark versions
+
+Behavior is the same on Spark 3.5 and 4.2 under the built-in catalog, `DeltaCatalog` and Iceberg's `SparkSessionCatalog`.

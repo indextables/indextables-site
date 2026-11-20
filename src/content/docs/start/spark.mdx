@@ -1,0 +1,165 @@
+---
+title: Get started with Spark
+description: Write a small table, search it, and count matches, in about ten minutes on your own machine.
+sidebar: { order: 1 }
+lid:
+  reviewed: a865437
+  fingerprint: e67afe9d71c7
+  class: derived
+  cites: [SPARK-WR-MODE, SPARK-RD-IQ, SPARK-RD-MODE, SPARK-RD-AGG, CORE-FM-MODE, SPARK-CAT-DDL]
+engine: [spark]
+---
+import { Tabs, TabItem, Steps } from '@astrojs/starlight/components';
+
+<div class="forwho"><b>You need</b> Spark 3.5 or 4.2 and the IndexTables jar for it. See <a href="/start/install/">Install</a>.</div>
+
+<Steps>
+
+1. **Start a session with the extension.**
+
+   The extension adds the `indexquery` operator and the IndexTables SQL commands.
+
+   <Tabs syncKey="lang">
+   <TabItem label="PySpark">
+   ```python
+   from pyspark.sql import SparkSession
+
+   spark = (SparkSession.builder
+     .master("local[2]")
+     .appName("IndexTables quickstart")
+     .config("spark.sql.extensions",
+             "io.indextables.extensions.IndexTablesSparkExtensions")
+     .config("spark.indextables.cache.disk.path", "/tmp/indextables-cache")
+     .getOrCreate())
+   ```
+   </TabItem>
+   <TabItem label="Scala">
+   ```scala
+   import org.apache.spark.sql.SparkSession
+
+   val spark = SparkSession.builder()
+     .master("local[2]")
+     .appName("IndexTables quickstart")
+     .config("spark.sql.extensions",
+       "io.indextables.extensions.IndexTablesSparkExtensions")
+     .config("spark.indextables.cache.disk.path", "/tmp/indextables-cache")
+     .getOrCreate()
+   import spark.implicits._
+   ```
+   </TabItem>
+   </Tabs>
+
+2. **Write a table.**
+
+   `title` is indexed as text, so it can be searched by word. Other string columns are indexed as whole values, which suits exact match.
+
+   <Tabs syncKey="lang">
+   <TabItem label="PySpark">
+   ```python
+   root = "/tmp/indextables-quickstart"   # use a fresh directory
+
+   docs = spark.createDataFrame([
+     (1, "The quick brown fox", "alpha", "us"),
+     (2, "quick fox jumps",     "beta",  "eu"),
+     (3, "lazy dog sleeps",     "alpha", "us"),
+   ], ["id", "title", "tag", "region"])
+
+   (docs.write.format("indextables")
+     .option("spark.indextables.indexing.typemap.title", "text")
+     .partitionBy("region")
+     .mode("append")
+     .save(root))
+   ```
+   </TabItem>
+   <TabItem label="Scala">
+   ```scala
+   val root = "/tmp/indextables-quickstart"   // use a fresh directory
+
+   val docs = Seq(
+     (1, "The quick brown fox", "alpha", "us"),
+     (2, "quick fox jumps",     "beta",  "eu"),
+     (3, "lazy dog sleeps",     "alpha", "us")
+   ).toDF("id", "title", "tag", "region")
+
+   docs.write.format("indextables")
+     .option("spark.indextables.indexing.typemap.title", "text")
+     .partitionBy("region")
+     .mode("append")
+     .save(root)
+   ```
+   </TabItem>
+   </Tabs>
+
+   `append` creates the table when the path holds none.
+
+3. **Read it and search.**
+
+   <Tabs syncKey="lang">
+   <TabItem label="PySpark">
+   ```python
+   table = spark.read.format("indextables").load(root)
+   table.createOrReplaceTempView("docs")
+
+   spark.sql("SELECT id, title FROM docs WHERE title indexquery 'fox'").show()
+   ```
+   </TabItem>
+   <TabItem label="Scala">
+   ```scala
+   val table = spark.read.format("indextables").load(root)
+   table.createOrReplaceTempView("docs")
+
+   spark.sql("SELECT id, title FROM docs WHERE title indexquery 'fox'").show()
+   ```
+   </TabItem>
+   <TabItem label="Spark SQL">
+   ```sql
+   CREATE TABLE docs USING indextables LOCATION '/tmp/indextables-quickstart';
+
+   SELECT id, title FROM docs WHERE title indexquery 'fox';
+   ```
+   </TabItem>
+   </Tabs>
+
+   ```text
+   +---+-------------------+
+   | id|              title|
+   +---+-------------------+
+   |  1|The quick brown fox|
+   |  2|    quick fox jumps|
+   +---+-------------------+
+   ```
+
+4. **Combine search with ordinary filters.**
+
+   ```sql
+   SELECT id, title FROM docs
+   WHERE title indexquery 'quick fox'   -- both words: AND is the default
+     AND region = 'us'                  -- partition filter
+     AND tag = 'alpha';                 -- exact match
+   ```
+
+5. **Count without fetching rows.**
+
+   ```sql
+   SELECT region, count(*) FROM docs
+   WHERE title indexquery 'fox'
+   GROUP BY region;
+   ```
+
+   The counts are computed in the index.
+
+</Steps>
+
+## Two things to know early
+
+**Reads are in fast mode by default.** Fast mode may limit how many rows a query returns to you, and tells you when it did. It never limits the rows that feed a write, a cache, a join or an aggregate. For complete results set `spark.indextables.read.mode` to `exact`. See [read modes](/guides/query/read-modes/).
+
+**Apply `indexquery` before caching.** The operator has to reach the IndexTables scan, so it cannot run over a DataFrame you have already cached.
+
+## Next
+
+- [Search text with IndexQuery](/guides/query/indexquery/): phrases, boolean operators, searching all columns.
+- [Choose how columns are indexed](/guides/tables/field-types/).
+- [Use tables by name](/guides/catalogs/tables-by-name/) in a catalog.
+- [Index an existing Delta, Iceberg or Parquet table](/guides/companions/overview/).
+- [Run on S3](/guides/storage/s3/).
