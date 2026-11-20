@@ -21,6 +21,7 @@ export default defineConfig({
       customCss: ['./src/styles/theme.css'],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/indextables/indextables' }],
       components: {
+        SiteTitle: './src/components/SiteTitle.astro',
         PageTitle: './src/components/PageTitle.astro',
         Footer: './src/components/Footer.astro',
       },

@@ -11,3 +11,4 @@
 - [x] **SITE-UI-TALK-001**: The talk embed shall load no resource from YouTube until the reader activates it, and shall then load the player from `youtube-nocookie.com`.
 - [x] **SITE-UI-TALK-002**: The talk embed shall show a link to the video on YouTube, chapter links with timestamps, and a statement that the talk describes IndexTables 0.5.x.
 - [x] **SITE-UI-HOME-001**: The home page shall show one example in Spark SQL, PySpark, Scala and DataFusion that combines a text match, an exact match and a range, and shall present standalone and companion tables side by side.
+- [x] **SITE-UI-NAV-001**: Every page, including the home page, shall show in its header links to the Why, Learn, Get started, Guides, Concepts, Reference and Blog sections, with the current section marked; on narrow screens the home page shall instead show a list of those sections above its footer.

@@ -20,6 +20,10 @@ Headlines are set in Fraunces, body in Inter, code in JetBrains Mono. Borders ar
 
 A 3×3 table grid with the centre cell filled in marker yellow: a hit found in a table. It is an SVG that stays legible at 16 px.
 
+## Site navigation
+
+The header carries links to the seven sections on every page, so the home page, which has no sidebar, still leads into the documentation. Documentation pages also show the full sidebar. On narrow screens the header links are hidden: documentation pages use the sidebar menu, and the home page ends with a list of the sections.
+
 ## Page header
 
 Below the title: an engine badge per engine the page applies to, a status badge when the status is not `available`, and the "View as Markdown" link. Legacy and still-changing pages show a notice.
