@@ -1,0 +1,17 @@
+---
+// @spec SITE-UI-VERIFIED-001
+import Default from '@astrojs/starlight/components/Footer.astro';
+import Spec from './Spec.astro';
+import { short, repo, commit } from '../lib/upstream';
+const lid = (Astro.locals.starlightRoute.entry.data as any).lid;
+const reviewed = lid?.reviewed ?? short;
+---
+{lid && lid.cites.length > 0 && (
+  <div class="verified">
+    <h4>Verified against</h4>
+    {lid.cites.map((c: string) => <Spec id={c} />)}
+    <p>Upstream <a href={`${repo}/tree/${commit}`}><code>{reviewed}</code></a> · {lid.class} page</p>
+  </div>
+)}
+<Default><slot /></Default>
+<p style="font-size:.8rem;color:var(--sl-color-gray-3);margin-top:1rem">For agents: <a href="/llms.txt">llms.txt</a> · every page is available as Markdown by adding <code>.md</code> to its address.</p>

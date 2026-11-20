@@ -1,0 +1,25 @@
+---
+// @spec SITE-UI-META-001, SITE-UI-META-002, SITE-MD-LINK-001, SITE-CONT-LEGACY-001, SITE-CONT-VOL-002
+import { ENGINE } from '../lib/upstream';
+const { entry, id } = Astro.locals.starlightRoute;
+const d = entry.data as any;
+const mdHref = '/' + (id === '' || id === 'index' ? 'index' : id.replace(/\/$/, '')) + '.md';
+const showMeta = d.template !== 'splash';
+---
+<h1 id="_top">{d.title}</h1>
+{showMeta && (
+  <div class="page-meta">
+    {d.engine.map((e: keyof typeof ENGINE) => <span class="eng">{ENGINE[e]}</span>)}
+    {d.status !== 'available' && <span class={`badge-s ${d.status}`}>{d.status === 'changing' ? 'Still changing' : d.status}</span>}
+    <a class="md" href={mdHref}>View as Markdown</a>
+  </div>
+)}
+{d.legacy && (
+  <div class="legacy-note">This was written for IndexTables 0.5.x, before the rebuild. Commands, settings and figures may differ from the current version. See <a href="/guides/migrate/from-0-5/">Migrate from 0.5.x</a>.</div>
+)}
+{d.status === 'changing' && (
+  <div class="changing-note">This area is still changing upstream. The page states only what is settled; details are added when the work lands.</div>
+)}
+<style>
+  h1 { margin-top: 1rem; font-size: var(--sl-text-h1); line-height: var(--sl-line-height-headings); font-weight: 600; color: var(--sl-color-white); }
+</style>
