@@ -1,0 +1,2 @@
+# Set to true at launch on www.indextables.io. While false, every build tells search engines not to index the site.
+launched: false

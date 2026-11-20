@@ -15,3 +15,4 @@
 - [x] **SITE-CONT-HONEST-001**: If a page that is not generated has status `available` and cites requirements none of which is implemented, then the site check shall fail naming the page.
 - [ ] **SITE-CONT-EX-001**: CI shall run the examples of the Spark and DataFusion quickstarts against a product build at the pinned commit, and shall fail when one does not run.
 - [x] **SITE-CONT-LINK-001**: If an internal link in a page's source points to no page, then the site check shall fail naming the page and the link.
+- [x] **SITE-CONT-LAUNCH-001**: While `data/launch.yaml` sets `launched` to false, the site shall serve a `/robots.txt` that disallows every path and shall mark every page `noindex, nofollow`; when it is true, `/robots.txt` shall allow every path and name the sitemap.

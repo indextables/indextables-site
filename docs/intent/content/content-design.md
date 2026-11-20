@@ -46,6 +46,10 @@ A page marked `available` must rest on at least one implemented requirement. A p
 
 Examples are written from upstream designs, requirements and tests. Running the quickstart examples in CI against a product build is a launch criterion and needs read access to the product repository.
 
+## Before launch
+
+The site is deployed from `main` to a preview address before it launches on `www.indextables.io`. `data/launch.yaml` holds one flag, `launched`. While it is false, `/robots.txt` disallows every path and every page carries `noindex, nofollow`, so the preview does not compete with the live 0.5.x site in search results. Setting it to true is part of launch.
+
 ## Positioning rules
 
 - Both engines are first-class. Examples that work in both show both.
