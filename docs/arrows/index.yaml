@@ -1,0 +1,43 @@
+schema_version: 2
+last_updated: 2026-11-20
+
+upstream:
+  lock: ../../upstream/lock.yaml
+  snapshot: ../../upstream/snapshot/specs.json
+
+arrows:
+  upstream-link:
+    status: PARTIAL
+    prefix: SITE-LINK
+    blocks: [generators, content, agent-markdown, site-ui]
+    blockedBy: []
+    detail: ../intent/upstream-link/upstream-link-design.md
+    next: "SITE-LINK-CI-001: publish the scheduled drift report as a rolling issue (needs a read credential for upstream while it is private)"
+  generators:
+    status: IMPLEMENTED
+    prefix: SITE-GEN
+    blocks: [content]
+    blockedBy: [upstream-link]
+    detail: ../intent/generators/generators-design.md
+    next: "SITE-GEN-ERR-001 deferred: error catalogue"
+  content:
+    status: IMPLEMENTED
+    prefix: SITE-CONT
+    blocks: []
+    blockedBy: [upstream-link, generators]
+    detail: ../intent/content/content-design.md
+    next: "Fill the pages marked changing when upstream settles clustering, profiling and the access model"
+  agent-markdown:
+    status: IMPLEMENTED
+    prefix: SITE-MD
+    blocks: []
+    blockedBy: [upstream-link]
+    detail: ../intent/agent-markdown/agent-markdown-design.md
+    next: null
+  site-ui:
+    status: IMPLEMENTED
+    prefix: SITE-UI
+    blocks: []
+    blockedBy: [upstream-link]
+    detail: ../intent/site-ui/site-ui-design.md
+    next: "Logo variants: one-colour, wordmark, social card"

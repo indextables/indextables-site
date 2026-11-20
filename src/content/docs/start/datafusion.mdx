@@ -1,0 +1,118 @@
+---
+title: Get started with DataFusion
+description: Register an IndexTables table in a DataFusion session and search it from Rust.
+sidebar: { order: 2 }
+lid:
+  reviewed: a865437
+  fingerprint: 2800323abd5a
+  class: derived
+  cites: [DF-AD-REG, DF-AD-PROV, DF-AD-FAC, DF-AD-IQ, DF-AD-PUSH, DF-AD-AGG, DF-AD-RT]
+engine: [datafusion]
+---
+import { Steps } from '@astrojs/starlight/components';
+
+<div class="forwho"><b>You need</b> a Rust toolchain and a table to read. The DataFusion adapter reads tables; it does not write them yet, so create one with <a href="/start/spark/">Spark</a> first.</div>
+
+The adapter is a `TableProvider` for DataFusion. Filters, `indexquery` and simple aggregates are pushed into the index; everything else is ordinary DataFusion.
+
+<Steps>
+
+1. **Add the crate.**
+
+   The crate is `indextables-datafusion`, in `native/datafusion` of the [product repository](https://github.com/indextables/indextables). It needs Rust 1.95.0 or later and exactly the DataFusion version its workspace pins.
+
+   ```toml
+   [package]
+   rust-version = "1.95.0"
+
+   [dependencies]
+   indextables-datafusion = { git = "https://github.com/indextables/indextables" }
+   datafusion = { version = "=55.2.0", default-features = false }
+   tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+   ```
+
+   :::caution[Subject to change]
+   The crate is not published yet, and the way to depend on it will change before the first release. The workspace builds against patched forks of some of its dependencies, and a project that depends on the crate by git does not inherit those patches today.
+   :::
+
+2. **Register the process host.**
+
+   The adapter shares caches and memory accounting across all sessions in the process. Register the Tokio runtime and a memory pool once, at start-up, and keep the returned registration alive.
+
+   ```rust
+   use std::sync::Arc;
+   use datafusion::execution::memory_pool::GreedyMemoryPool;
+   use indextables_datafusion::register_process_host;
+
+   let pool = Arc::new(GreedyMemoryPool::new(2 * 1024 * 1024 * 1024));
+   let _host = register_process_host(tokio::runtime::Handle::current(), pool, None)?;
+   ```
+
+3. **Build a session with the table factory.**
+
+   The factory makes `STORED AS INDEXTABLES` work. Its resolver returns the storage settings for a table location, as Hadoop-style keys such as `fs.s3a.access.key`. An empty map is enough for a local path.
+
+   ```rust
+   use datafusion::execution::session_state::SessionStateBuilder;
+   use datafusion::prelude::*;
+   use indextables_datafusion::{
+       install_aggregate_pushdown, register_index_query_functions,
+       IndexTablesTableFactory, KeyMapResolver, INDEXTABLES_FILE_TYPE,
+   };
+
+   let resolver: KeyMapResolver = Arc::new(|_root: &str| Some(Default::default()));
+
+   let builder = SessionStateBuilder::new()
+       .with_default_features()
+       .with_table_factory(
+           INDEXTABLES_FILE_TYPE.to_string(),
+           Arc::new(IndexTablesTableFactory::new(resolver)),
+       );
+   let ctx = SessionContext::new_with_state(install_aggregate_pushdown(builder).build());
+   register_index_query_functions(&ctx);
+   ```
+
+4. **Register a table and search it.**
+
+   ```rust
+   ctx.sql("CREATE EXTERNAL TABLE docs STORED AS INDEXTABLES \
+            LOCATION '/tmp/indextables-quickstart'").await?;
+
+   ctx.sql("SELECT id, title FROM docs \
+            WHERE indexquery(title, 'fox') AND region = 'us'")
+       .await?.show().await?;
+
+   ctx.sql("SELECT region, count(*) FROM docs \
+            WHERE indexquery(title, 'fox') GROUP BY region")
+       .await?.show().await?;
+   ```
+
+</Steps>
+
+You can also construct a provider directly and register it under any name:
+
+```rust
+use indextables_datafusion::IndexTablesProvider;
+
+let provider = IndexTablesProvider::try_new("/tmp/indextables-quickstart", Default::default(), None).await?;
+ctx.register_table("docs", Arc::new(provider))?;
+```
+
+The third argument pins a table version; `None` reads the latest.
+
+## How this differs from Spark
+
+| | Spark | DataFusion |
+|---|---|---|
+| Search syntax | `title indexquery 'fox'` | `indexquery(title, 'fox')` |
+| All-columns search | `indexqueryall('fox')` | `indexqueryall('fox')` |
+| Writes | Yes | Not yet |
+| Read mode | Fast by default, exact on request | Always complete results |
+| Aggregate pushdown | Counts, sums, min, max, and bucket functions | `count`, `sum`, `min`, `max` |
+| Maintenance commands | Yes | Run them from Spark |
+
+## Next
+
+- [DataFusion adapter guide](/guides/datafusion/adapter/): pushdown, partitions, listing modes and limits.
+- [Catalogs in DataFusion](/guides/catalogs/datafusion/): the read-only catalog provider.
+- [Search text with IndexQuery](/guides/query/indexquery/).

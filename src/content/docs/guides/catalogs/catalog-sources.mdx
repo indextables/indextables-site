@@ -1,0 +1,118 @@
+---
+title: Catalog sources for companions
+description: Build and sync companions from Iceberg tables in REST, Glue and Hive Metastore catalogs, and from Delta tables by name, with catalog-issued credentials.
+sidebar: { order: 6 }
+lid:
+  reviewed: a865437
+  fingerprint: bf54fdb148dd
+  class: derived
+  cites: [SPARK-SYNC-ICE, SPARK-SYNC-DLT, SPARK-SYNC-SRC, SPARK-SYNC-CFG, CORE-SRD-ICE]
+engine: [spark]
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A companion's source table can be named in a catalog instead of given as a path. IndexTables resolves the name in that catalog on every sync, so it always follows the table's current state.
+
+## Iceberg
+
+<Tabs>
+<TabItem label="REST">
+```sql
+BUILD INDEXTABLES COMPANION FOR ICEBERG 'analytics.events'
+  CATALOG 'prod' TYPE 'rest'
+  WAREHOUSE 'prod_warehouse'
+  AT LOCATION 's3://my-bucket/indexes/events';
+```
+```python
+spark.conf.set("spark.indextables.iceberg.uri", "https://catalog.example.com/api/catalog")
+spark.conf.set("spark.indextables.iceberg.credential", "<client-id>:<client-secret>")   # or iceberg.token
+```
+Tested end to end. Storage credentials issued by the catalog are used to read the table's metadata and manifests.
+</TabItem>
+<TabItem label="AWS Glue">
+```sql
+BUILD INDEXTABLES COMPANION FOR ICEBERG 'analytics.events'
+  CATALOG 'glue' TYPE 'glue'
+  WAREHOUSE 's3://my-bucket/warehouse'
+  AT LOCATION 's3://my-bucket/indexes/events';
+```
+AWS credentials and region come from the IndexTables AWS settings or the environment. Tested as far as constructing the catalog.
+</TabItem>
+<TabItem label="Hive Metastore">
+```sql
+BUILD INDEXTABLES COMPANION FOR ICEBERG 'analytics.events'
+  CATALOG 'hive' TYPE 'hms'
+  WAREHOUSE 's3://my-bucket/warehouse'
+  AT LOCATION 's3://my-bucket/indexes/events';
+```
+```python
+spark.conf.set("spark.indextables.iceberg.uri", "thrift://metastore.internal:9083")
+```
+Tested as far as constructing the catalog.
+</TabItem>
+<TabItem label="S3-compatible storage">
+```python
+spark.conf.set("spark.indextables.iceberg.catalogType", "rest")
+spark.conf.set("spark.indextables.iceberg.uri", "http://catalog.internal:8181")
+spark.conf.set("spark.indextables.iceberg.s3Endpoint", "http://minio.internal:9000")
+spark.conf.set("spark.indextables.iceberg.s3PathStyleAccess", "true")
+```
+```sql
+BUILD INDEXTABLES COMPANION FOR ICEBERG 'analytics.events'
+  AT LOCATION 's3://indexes/events';
+```
+</TabItem>
+</Tabs>
+
+### Where catalog settings come from
+
+In order of precedence:
+
+1. The command's `CATALOG`, `TYPE` and `WAREHOUSE` clauses.
+2. The values the companion stored at its first build, so later syncs need not repeat them.
+3. `spark.indextables.iceberg.*` in the session.
+
+### Credentials
+
+| For | Credentials used |
+|---|---|
+| Catalog calls | `iceberg.token` or `iceberg.credential` |
+| Table metadata and manifests | Credentials the catalog issues, when it issues them |
+| Data files during a build | The configured companion source credentials |
+
+Explicitly configured source credentials take precedence over catalog-issued ones. Catalog-issued credentials are refreshed by reloading the table.
+
+## Delta
+
+<Tabs>
+<TabItem label="By name">
+```sql
+BUILD INDEXTABLES COMPANION FOR DELTA 'main.logs.events'
+  CATALOG 'main'
+  AT LOCATION 's3://my-bucket/indexes/events';
+```
+The name is resolved to a location and credentials through the configured table credential provider. With [Unity Catalog](/guides/catalogs/unity-catalog/) that is the workspace.
+</TabItem>
+<TabItem label="By path">
+```sql
+BUILD INDEXTABLES COMPANION FOR DELTA 's3://my-bucket/delta/events'
+  AT LOCATION 's3://my-bucket/indexes/events';
+```
+</TabItem>
+</Tabs>
+
+## Different credentials for source and index
+
+The source table and the companion often live in different buckets or accounts. Give the source its own credentials:
+
+```python
+spark.conf.set("spark.indextables.companion.parquet.aws.accessKey", "<source-access-key>")
+spark.conf.set("spark.indextables.companion.parquet.aws.secretKey", "<source-secret-key>")
+spark.conf.set("spark.indextables.companion.parquet.aws.region", "eu-west-1")
+```
+
+When any source credential key is set, the source is opened with those keys alone and never falls back to the index's credentials. Readers of the companion need them too, because rows are fetched from the source.
+
+## Then query it
+
+By its location, or by the source table's name through the [companion lookup catalog](/guides/catalogs/companion-lookup/).

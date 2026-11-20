@@ -1,0 +1,45 @@
+---
+// @spec SITE-UI-TALK-001, SITE-UI-TALK-002
+const id = 'PqLCqE4zOY0';
+const { chapters = true } = Astro.props;
+const CH: [number, string, string, string][] = [
+  [58, '0:58', 'The painful reality of full-table scans', '/why/why-indextables/'],
+  [459, '7:39', 'Bloom filters, partitioning and Z-ordering trade-offs', '/why/why-indextables/'],
+  [652, '10:52', 'Introducing IndexTables', '/learn/what-is-indextables/'],
+  [1000, '16:40', 'Architecture: Spark as the front door', '/concepts/architecture/'],
+  [1131, '18:51', 'The IndexQuery operator', '/guides/query/indexquery/'],
+  [1261, '21:01', 'Companion mode for existing lakehouse tables', '/concepts/standalone-and-companion/'],
+  [1692, '28:12', 'Pre-warming the cache', '/guides/operations/caches-and-prewarm/'],
+];
+---
+<div class="talk">
+  <button class="talk-poster" type="button" data-id={id} aria-label="Play the talk">
+    <span class="talk-play">▶</span>
+    <span class="talk-title">Indexed and Full-Text Search in the Lakehouse</span>
+    <span class="talk-sub">Scott Schenkein · published by Databricks Events · 36 min · plays from YouTube</span>
+  </button>
+  <div class="talk-side">
+    <p class="talk-note"><b>Recorded for IndexTables 0.5.x.</b> The ideas carry over; commands, settings and the benchmark figures in the talk describe the earlier version.</p>
+    {chapters && (
+      <ol class="talk-ch">
+        {CH.map(([t, label, text, href]) => (
+          <li><a class="ts" href={`https://www.youtube.com/watch?v=${id}&t=${t}s`}>{label}</a> <a href={href}>{text}</a></li>
+        ))}
+      </ol>
+    )}
+    <p><a href={`https://www.youtube.com/watch?v=${id}`}>Watch on YouTube</a></p>
+  </div>
+</div>
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.talk-poster').forEach((b) =>
+    b.addEventListener('click', () => {
+      const f = document.createElement('iframe');
+      f.src = `https://www.youtube-nocookie.com/embed/${b.dataset.id}?autoplay=1`;
+      f.allow = 'autoplay; encrypted-media; picture-in-picture';
+      f.allowFullscreen = true;
+      f.title = 'Indexed and Full-Text Search in the Lakehouse';
+      f.className = 'talk-frame';
+      b.replaceWith(f);
+    }),
+  );
+</script>

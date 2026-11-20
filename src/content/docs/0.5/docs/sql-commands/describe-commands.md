@@ -1,0 +1,370 @@
+---
+title: "DESCRIBE Commands"
+description: "Monitor cache, storage, and table statistics"
+slug: 0.5/docs/sql-commands/describe-commands
+legacy: true
+pagefind: false
+lid:
+  class: authored
+---
+
+Monitor cache usage, storage statistics, and table information.
+
+## DESCRIBE DISK CACHE
+
+View disk cache statistics across all executors:
+
+```sql
+DESCRIBE INDEXTABLES DISK CACHE;
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| executor_id | Executor identifier |
+| host | IP:port |
+| enabled | Cache enabled status |
+| total_bytes | Current cache size |
+| max_bytes | Maximum cache size |
+| usage_percent | Usage percentage |
+| splits_cached | Number of splits cached |
+| components_cached | Number of components cached |
+
+## DESCRIBE STORAGE STATS
+
+View object storage access statistics:
+
+```sql
+DESCRIBE INDEXTABLES STORAGE STATS;
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| executor_id | Executor identifier |
+| host | IP:port |
+| bytes_fetched | Total bytes fetched from storage |
+| requests | Number of storage requests |
+
+## DESCRIBE DATA SKIPPING STATS
+
+View data skipping effectiveness and cache hit rates:
+
+```sql
+DESCRIBE INDEXTABLES DATA SKIPPING STATS;
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| metric_type | Category: data_skipping, filter_expr_cache, partition_filter_cache, filter_type_skips |
+| metric_name | Name of the metric |
+| metric_value | Metric value |
+
+### Metrics
+
+**Data Skipping:**
+- `total_files_considered` - Files evaluated before pruning
+- `partition_pruned_files` - Files pruned by partition filters
+- `data_skipped_files` - Files pruned by min/max statistics
+- `final_files_scanned` - Files actually read
+- `partition_skip_rate` - Percentage of files skipped by partitions
+- `data_skip_rate` - Percentage of files skipped by statistics
+- `total_skip_rate` - Overall file skip rate
+
+**Filter Expression Cache:**
+- `simplified_hits/misses` - Filter simplification cache stats
+- `in_range_hits/misses` - Range check cache stats
+- Hit rates and cache sizes
+
+## DESCRIBE STATE
+
+View transaction log state format, version, and statistics:
+
+```sql
+DESCRIBE INDEXTABLES STATE 's3://bucket/my_index';
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| format | State format: "avro" or "json" |
+| version | Current state version |
+| total_files | Total active files in table |
+| tombstone_count | Number of tombstone entries |
+| tombstone_ratio | Tombstone percentage (triggers compaction at 10%) |
+| manifest_count | Number of manifest files (Avro only) |
+| protocol_version | Table protocol version |
+| last_checkpoint | Most recent checkpoint version |
+
+Use this to monitor table health and determine if compaction or checkpoint is needed.
+
+## DESCRIBE COMPONENT SIZES
+
+Analyze storage consumption at the index component level:
+
+```sql
+DESCRIBE INDEXTABLES COMPONENT SIZES 's3://bucket/my_index';
+
+-- With partition filter for efficiency
+DESCRIBE INDEXTABLES COMPONENT SIZES 's3://bucket/my_index'
+  WHERE date = '2024-01-15';
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| split_path | Split file path |
+| partition_values | Partition column values |
+| component | Component identifier |
+| component_type | term, postings, positions, store, fastfield, fieldnorm |
+| size_bytes | Size in bytes |
+| field_name | Associated field (when applicable) |
+
+### Use Cases
+
+- **Index size analysis**: Identify which components consume the most storage
+- **Schema optimization**: Find fields that may benefit from different indexing strategies (e.g., switching from `position` to `basic` index record option)
+- **Capacity planning**: Estimate storage requirements based on component breakdowns
+- **Debugging**: Diagnose indexing issues by examining component-level details
+
+### Example Analysis
+
+```sql
+-- Find largest components by type
+SELECT component_type, SUM(size_bytes) as total_bytes
+FROM (
+  DESCRIBE INDEXTABLES COMPONENT SIZES 's3://bucket/logs'
+)
+GROUP BY component_type
+ORDER BY total_bytes DESC;
+```
+
+## DESCRIBE TRANSACTION LOG
+
+View the contents of a table's transaction log:
+
+```sql
+-- View current state (from latest checkpoint forward)
+DESCRIBE INDEXTABLES TRANSACTION LOG 's3://bucket/my_index';
+
+-- View complete history from version 0
+DESCRIBE INDEXTABLES TRANSACTION LOG 's3://bucket/my_index' INCLUDE ALL;
+```
+
+### Output
+
+Returns detailed information about all transaction log actions including:
+- `version` - Transaction log version number
+- `action_type` - ADD, REMOVE, SKIP, PROTOCOL, or METADATA
+- `path` - Split file path
+- `partition_values` - Partition column values
+- `size` - File size in bytes
+- `num_records` - Document count
+- `min_values/max_values` - Column statistics for data skipping
+- And many more fields for debugging and analysis
+
+## TABLE ROOT Commands
+
+Manage named table roots for cross-region companion reads. See [Multi-Region Table Roots](/0.5/docs/core-concepts/companion-mode/#multi-region-table-roots) for details.
+
+### SET TABLE ROOT
+
+Register a named table root:
+
+```sql
+SET INDEXTABLES TABLE ROOT 'us-east' = 's3://us-east-replica/events'
+  FOR 's3://warehouse/events_index';
+```
+
+### UNSET TABLE ROOT
+
+Remove a named table root:
+
+```sql
+UNSET INDEXTABLES TABLE ROOT 'us-east'
+  FOR 's3://warehouse/events_index';
+```
+
+### DESCRIBE TABLE ROOTS
+
+List all registered table roots for a companion index:
+
+```sql
+DESCRIBE INDEXTABLES TABLE ROOTS 's3://warehouse/events_index';
+```
+
+#### Output
+
+| Column | Description |
+|--------|-------------|
+| root_name | Named table root identifier |
+| root_path | Storage path for the root |
+
+## DESCRIBE ENVIRONMENT
+
+View Spark and Hadoop configuration across all executors:
+
+```sql
+DESCRIBE INDEXTABLES ENVIRONMENT;
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| host | Executor host:port |
+| role | "driver" or "worker" |
+| property_type | "spark" or "hadoop" |
+| property_name | Configuration property name |
+| property_value | Property value (sensitive values redacted) |
+
+Useful for debugging configuration issues across a cluster.
+
+## DESCRIBE PREWARM JOBS
+
+View the status of async prewarm jobs across all executors:
+
+```sql
+DESCRIBE INDEXTABLES PREWARM JOBS;
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| job_id | Unique job identifier |
+| executor_id | Executor running the job |
+| host | Executor hostname |
+| table_path | Path being prewarmed |
+| status | pending, running, completed, failed |
+| splits_total | Total splits to prewarm |
+| splits_completed | Splits prewarmed so far |
+| progress_percent | Completion percentage |
+| started_at | Job start timestamp |
+| completed_at | Job completion timestamp (if finished) |
+| error_message | Error details (if failed) |
+
+This command provides cluster-wide visibility into all async prewarm operations, useful for monitoring long-running prewarm jobs or debugging failures.
+
+## WAIT FOR PREWARM JOBS
+
+Block until all async prewarm jobs complete:
+
+```sql
+-- Wait indefinitely for all jobs to complete
+WAIT FOR INDEXTABLES PREWARM JOBS;
+
+-- Wait with a timeout (in seconds)
+WAIT FOR INDEXTABLES PREWARM JOBS TIMEOUT 300;
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| jobs_completed | Number of jobs that completed successfully |
+| jobs_failed | Number of jobs that failed |
+| total_splits_prewarmed | Total splits prewarmed across all jobs |
+| total_duration_ms | Total time waited in milliseconds |
+| timed_out | Whether the wait timed out |
+
+Use this command when you need to ensure prewarming is complete before running benchmarks or time-sensitive queries.
+
+### Examples
+
+```sql
+-- Start async prewarm, then wait before benchmark
+PREWARM INDEXTABLES CACHE 's3://bucket/logs' ASYNC MODE;
+
+-- Do other work...
+
+-- Wait up to 10 minutes for prewarm to complete
+WAIT FOR INDEXTABLES PREWARM JOBS TIMEOUT 600;
+
+-- Now run your benchmark queries
+SELECT COUNT(*) FROM indextables('s3://bucket/logs') WHERE status = 'error';
+```
+
+## FLUSH Commands
+
+### FLUSH DISK CACHE
+
+Clear the L2 disk cache across all executors:
+
+```sql
+FLUSH INDEXTABLES DISK CACHE;
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| executor_id | Executor identifier |
+| cache_type | Type of cache flushed |
+| status | success or error |
+| bytes_freed | Bytes deleted |
+| files_deleted | Files removed |
+| message | Status message |
+
+### FLUSH SEARCHER CACHE
+
+Clear the in-memory (L1) searcher cache:
+
+```sql
+FLUSH INDEXTABLES SEARCHER CACHE;
+```
+
+This clears:
+- Split cache managers
+- Driver-side locality assignments
+- Native tantivy4java caches
+
+### FLUSH DATA SKIPPING STATS
+
+Reset data skipping statistics (keeps cache entries):
+
+```sql
+FLUSH INDEXTABLES DATA SKIPPING STATS;
+```
+
+## INVALIDATE Commands
+
+### INVALIDATE TRANSACTION LOG CACHE
+
+Force refresh of transaction log cache for a specific table:
+
+```sql
+-- Invalidate cache for a specific table
+INVALIDATE INDEXTABLES TRANSACTION LOG CACHE FOR 's3://bucket/my_index';
+```
+
+### Output
+
+| Column | Description |
+|--------|-------------|
+| table_path | Path that was invalidated |
+| result | Success or error message |
+| cache_hits_before | Cache hits before invalidation |
+| cache_misses_before | Cache misses before invalidation |
+| hit_rate_before | Cache hit rate before invalidation |
+
+Use this when you know the table has been modified externally and want to force a refresh.
+
+### INVALIDATE DATA SKIPPING CACHE
+
+Clear data skipping caches (both entries and statistics):
+
+```sql
+INVALIDATE INDEXTABLES DATA SKIPPING CACHE;
+```
+
+This clears:
+- Filter expression cache entries
+- Partition filter cache entries
+- All statistics

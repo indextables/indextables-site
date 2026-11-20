@@ -1,0 +1,7 @@
+# The upstream commit every page of this site is checked against.
+upstream:
+  repo: indextables/indextables
+  commit: a865437ec1002454a2abe2f12a15a2f27928e373
+  pinned_at: 2026-11-20
+  lid_version: 1.4.0
+  channel: next

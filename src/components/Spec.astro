@@ -1,0 +1,9 @@
+---
+// @spec SITE-UI-CHIP-001, SITE-UI-CHIP-002
+import { statusOf, hrefOf, resolve } from '../lib/upstream';
+const { id } = Astro.props;
+const m = statusOf(id);
+const n = resolve(id).length;
+const title = n > 1 ? `${id}: ${n} requirements, ${m}` : `${id}: ${m}`;
+---
+<a class="spec" data-m={m} href={hrefOf(id)} title={title}>{id}</a>

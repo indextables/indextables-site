@@ -1,0 +1,117 @@
+---
+title: Create and write tables
+description: Create a standalone table, append to it, overwrite all or part of it, and understand what a commit is.
+sidebar: { order: 1 }
+lid:
+  reviewed: a865437
+  fingerprint: 4ee0f55d8133
+  class: derived
+  cites: [SPARK-WR-CAP, SPARK-WR-MODE, SPARK-WR-VAL, SPARK-WR-CMT, SPARK-WR-HOOK, CORE-TF-CMT]
+  docs: [spark/write/write-design.md#Write Modes]
+engine: [spark]
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A standalone table lives under one storage path, its *root*. Writing a DataFrame to a root creates index files (splits) there and records them in the table's transaction log in one commit.
+
+## Create or append
+
+<Tabs syncKey="lang">
+<TabItem label="PySpark">
+```python
+(df.write.format("indextables")
+  .option("spark.indextables.indexing.typemap.message", "text")
+  .partitionBy("day")
+  .mode("append")
+  .save("s3://my-bucket/events"))
+```
+</TabItem>
+<TabItem label="Scala">
+```scala
+df.write.format("indextables")
+  .option("spark.indextables.indexing.typemap.message", "text")
+  .partitionBy("day")
+  .mode("append")
+  .save("s3://my-bucket/events")
+```
+</TabItem>
+<TabItem label="Spark SQL">
+```sql
+CREATE TABLE logs.events USING indextables
+PARTITIONED BY (day)
+LOCATION 's3://my-bucket/events'
+AS SELECT * FROM staging.events;
+
+INSERT INTO logs.events SELECT * FROM staging.events_today;
+```
+</TabItem>
+</Tabs>
+
+`append` creates the table when the root holds none. The first write fixes how each column is indexed and which columns partition the table; later appends must match. See [field types](/guides/tables/field-types/) and [partitioning](/guides/tables/partitioning/).
+
+## Overwrite
+
+<Tabs syncKey="lang">
+<TabItem label="PySpark">
+```python
+# Replace the whole table
+df.write.format("indextables").mode("overwrite").save(root)
+
+# Replace the partitions matching a predicate; every row of df must satisfy it
+(df.write.format("indextables")
+  .option("replaceWhere", "day = '2026-11-01'")
+  .mode("overwrite").save(root))
+```
+</TabItem>
+<TabItem label="Scala">
+```scala
+// Replace the whole table
+df.write.format("indextables").mode("overwrite").save(root)
+
+// Replace the partitions matching a predicate; every row of df must satisfy it
+df.write.format("indextables")
+  .option("replaceWhere", "day = '2026-11-01'")
+  .mode("overwrite").save(root)
+```
+</TabItem>
+<TabItem label="Spark SQL">
+```sql
+INSERT OVERWRITE logs.events SELECT * FROM staging.events;
+```
+</TabItem>
+</Tabs>
+
+An overwrite is one commit that removes the replaced splits from the table and adds the new ones. The old files stay on storage until [PURGE](/guides/maintenance/purge/) removes them.
+
+Rules that differ from other formats:
+
+- **`replaceWhere` takes partition columns only.** A predicate on any other column is rejected before the job starts, because replacing part of an index file would mean rewriting it.
+- **Dynamic partition overwrite is not supported.** With `partitionOverwriteMode` set to `dynamic`, a full overwrite of a partitioned table fails before any task runs and points you to `replaceWhere`. It does not silently replace the whole table.
+- **Changing the schema needs `overwriteSchema=true`.** Without it, a full overwrite whose columns or partition columns differ from the table's is rejected. Appends never change the schema.
+- **A new table needs an empty directory.** Creating a table in a directory that already holds other files fails, so a later purge cannot mistake them for its own.
+
+## What a commit guarantees
+
+- **Readers see whole commits.** A query reads one snapshot of the table. A write in progress is invisible until its commit lands.
+- **Writers do not block each other.** Commits use put-if-absent on the log's version file. Appends do not conflict with each other. An overwrite conflicts with a write that landed in the data it replaces after it started, and fails instead of losing that write.
+- **Failed writes leave no rows.** Files uploaded by a failed write are never referenced by the log, and PURGE removes them later.
+
+Because commits rely on put-if-absent, the storage must support it. S3 and most S3-compatible stores do; see [S3](/guides/storage/s3/).
+
+## After the commit
+
+After a successful commit the driver runs these hooks, in order. A hook that fails is logged and counted; it never fails or undoes the write.
+
+| Hook | What it does |
+|---|---|
+| Checkpoint compaction | Rewrites the log's state when the commit reports that it is due |
+| Merge-on-write | Merges small splits so the table does not accumulate them |
+| Purge-on-write | Removes unreferenced files past their retention |
+
+Their settings are under `mergeOnWrite.*`, `purgeOnWrite.*` and `checkpoint.*` in the [configuration reference](/reference/configuration/).
+
+## Limits
+
+- Writes to Azure and GCS are not available yet. Reads are.
+- There is no Structured Streaming sink. Write micro-batches with `foreachBatch`.
+- The DataFusion adapter does not write.

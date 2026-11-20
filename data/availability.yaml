@@ -1,0 +1,44 @@
+# Features shown in the availability matrix. Status is computed from the cited upstream specs:
+# some implemented → Available (open requirements are counted in Limits); none implemented → Planned; all deferred → Deferred.
+# `note` states a limit that the cited specs record as deferred or refused.
+- area: Tables
+  rows:
+    - { feature: 'Create, append and overwrite', engine: [spark], cites: [SPARK-WR-MODE, SPARK-WR-CMT], link: /guides/tables/write/ }
+    - { feature: Partitioning and pruning, engine: [spark, datafusion], cites: [CORE-PE, SPARK-RD-PART, DF-AD-PART], link: /guides/tables/partitioning/ }
+    - { feature: Field types and tokenizers, engine: [spark], cites: [CORE-FM], link: /guides/tables/field-types/ }
+    - { feature: Variant columns (Spark 4.2), engine: [spark], cites: [CORE-FM-JSON], link: /guides/tables/variant/, note: Top-level columns only }
+    - { feature: Structured Streaming source, engine: [spark], cites: [SPARK-STR], link: /guides/tables/streaming-source/, note: No streaming sink }
+- area: Query
+  rows:
+    - { feature: IndexQuery full-text search, engine: [spark, datafusion], cites: [SPARK-RD-IQ, CORE-QRY-IQ, DF-AD-IQ], link: /guides/query/indexquery/ }
+    - { feature: 'Exact match, range and null filters', engine: [spark, datafusion], cites: [SPARK-RD-FLT, CORE-QRY-CMP, DF-AD-PUSH], link: /guides/query/filters/ }
+    - { feature: Aggregate pushdown, engine: [spark, datafusion], cites: [SPARK-RD-AGG, CORE-AGG-EXEC, DF-AD-AGG], link: /guides/query/aggregates/, note: 'DataFusion: count, sum, min, max' }
+    - { feature: Bucket aggregates, engine: [spark], cites: [SPARK-RD-BKT, CORE-AGG-BKT], link: /guides/query/aggregates/ }
+    - { feature: Fast and exact read modes, engine: [spark], cites: [SPARK-RD-MODE, SPARK-RD-LIM], link: /guides/query/read-modes/ }
+- area: Companions
+  rows:
+    - { feature: Parquet directory companions, engine: [spark], cites: [SPARK-SYNC-PQ, CORE-SRD-PQ], link: /guides/companions/parquet/ }
+    - { feature: Delta companions, engine: [spark], cites: [SPARK-SYNC-DLT, CORE-SRD-DLT], link: /guides/companions/delta/ }
+    - { feature: Iceberg companions, engine: [spark], cites: [SPARK-SYNC-ICE, CORE-SRD-ICE], link: /guides/companions/iceberg/, note: No time travel; no Avro or ORC delete files }
+    - { feature: Incremental sync, engine: [spark], cites: [SPARK-SYNC-INC, SPARK-SYNC-WM], link: /guides/companions/sync/ }
+    - { feature: Streaming sync, engine: [spark], cites: [SPARK-SYNC-STRM], link: /guides/companions/sync/ }
+    - { feature: Row-level deletes, engine: [spark], cites: [SPARK-SYNC-DEL, CORE-SRD-DEL, CORE-CF-DEL], link: /guides/companions/deletes/ }
+    - { feature: Reading companions, engine: [spark, datafusion], cites: [SPARK-STR-CMP, CORE-SRCH-CMP, DF-AD-SCAN], link: /concepts/standalone-and-companion/ }
+- area: Catalogs
+  rows:
+    - { feature: Tables by name in the session catalog, engine: [spark], cites: [SPARK-CAT-ENT, SPARK-CAT-RES, SPARK-CAT-DDL, SPARK-CAT-WR], link: /guides/catalogs/tables-by-name/ }
+    - { feature: Companion lookup catalog, engine: [spark], cites: [SPARK-OPS-CAT], link: /guides/catalogs/companion-lookup/ }
+    - { feature: CREATE EXTERNAL TABLE, engine: [datafusion], cites: [DF-AD-FAC], link: /guides/catalogs/datafusion/ }
+    - { feature: Read-only catalog provider, engine: [datafusion], cites: [DF-AD-CAT], link: /guides/catalogs/datafusion/, note: Entry source supplied by the embedder }
+- area: Storage and credentials
+  rows:
+    - { feature: Local and S3-compatible storage, engine: [spark, datafusion], cites: [CORE-STO-OP, CORE-STO-MPU], link: /guides/storage/s3/ }
+    - { feature: Azure and GCS reads, engine: [spark, datafusion], cites: [CORE-STO-CRED], link: /guides/storage/azure-gcs/ }
+    - { feature: Azure and GCS writes, engine: [spark], cites: [CORE-STO-OP], link: /guides/storage/azure-gcs/, force: planned, note: 'Puts, uploads and deletes are disabled until validated against the real services' }
+    - { feature: Unity Catalog credentials (S3), engine: [spark], cites: [SPARK-CFG-CRED, SPARK-CAT-CRED], link: /guides/catalogs/unity-catalog/ }
+- area: Maintenance and operations
+  rows:
+    - { feature: MERGE SPLITS, engine: [spark], cites: [SPARK-MNT-MRG], link: /guides/maintenance/merge-splits/ }
+    - { feature: 'PURGE, TRUNCATE TIME TRAVEL', engine: [spark], cites: [SPARK-MNT-PRG, SPARK-MNT-TT], link: /guides/maintenance/purge/ }
+    - { feature: 'DROP PARTITIONS, CHECKPOINT, REPAIR', engine: [spark], cites: [SPARK-MNT-DROP, SPARK-MNT-CKPT, SPARK-MNT-REP], link: /guides/maintenance/overview/ }
+    - { feature: Caches and prewarm, engine: [spark], cites: [SPARK-OPS-PRE, CORE-CACHE-PRE, CORE-CACHE-L2], link: /guides/operations/caches-and-prewarm/ }

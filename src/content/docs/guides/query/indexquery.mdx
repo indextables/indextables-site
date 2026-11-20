@@ -1,0 +1,114 @@
+---
+title: Search text with IndexQuery
+description: The indexquery operator and its query syntax, with terms, phrases, wildcards, ranges and boolean logic.
+sidebar: { order: 1 }
+lid:
+  reviewed: a865437
+  fingerprint: b0185d878d0d
+  class: derived
+  cites: [SPARK-RD-IQ, CORE-QRY-IQ, CORE-QRY-IQV, DF-AD-IQ]
+  docs: [spark/read/read-design.md#IndexQuery in Spark]
+engine: [spark, datafusion]
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+`indexquery` filters rows by a search expression. It goes in a `WHERE` clause and combines with any other SQL predicate.
+
+<Tabs syncKey="lang">
+<TabItem label="Spark SQL">
+```sql
+SELECT ts, message FROM events
+WHERE message indexquery 'connection AND (timeout OR refused)'
+  AND day = DATE '2026-11-01';
+```
+</TabItem>
+<TabItem label="PySpark">
+```python
+events.where("message indexquery 'connection AND (timeout OR refused)'") \
+      .where("day = '2026-11-01'")
+```
+</TabItem>
+<TabItem label="Scala">
+```scala
+events.where("message indexquery 'connection AND (timeout OR refused)'")
+      .where("day = '2026-11-01'")
+```
+</TabItem>
+<TabItem label="DataFusion">
+```sql
+SELECT ts, message FROM events
+WHERE indexquery(message, 'connection AND (timeout OR refused)')
+  AND day = DATE '2026-11-01';
+```
+</TabItem>
+</Tabs>
+
+## Forms
+
+| Spark | DataFusion | Searches |
+|---|---|---|
+| `col indexquery 'q'` | `indexquery(col, 'q')` | One column |
+| `indexqueryall('q')` or `* indexquery 'q'` | `indexqueryall('q')` | Every text column |
+| `col TEXTSEARCH 'q'` | | One column, which must be tokenized |
+| `col FIELDMATCH 'q'` | | One column, which must not be tokenized |
+
+`TEXTSEARCH` and `FIELDMATCH` behave like `indexquery` and add a check that the column is indexed the way you expect, so a mistake fails instead of returning nothing.
+
+The query must be a string literal. Spark also registers function forms such as `indextables_indexquery(col, 'q')`.
+
+## Query syntax
+
+Several words with no operator must all match: **AND is the default**.
+
+| Syntax | Matches | Example |
+|---|---|---|
+| `word` | The word | `timeout` |
+| `a b` or `a AND b` | Both | `disk full` |
+| `a OR b` | Either | `timeout OR refused` |
+| `NOT a` or `-a` | Rows without it | `error -healthcheck` |
+| `( … )` | Grouping | `(disk OR quota) AND full` |
+| `"a b"` | The exact phrase | `"connection refused"` |
+| `"a b"~2` | The phrase with up to two words between or out of place | `"connection refused"~2` |
+| `'a b'` | Every word, in any order | `'refused connection'` |
+| `"a b"*` | A phrase whose last word is a prefix | `"connection ref"*` |
+| `wor*`, `w?rd` | Wildcards on whole terms: `*` any run of characters, `?` one character | `time*` |
+| `field:/re/` | A regular expression over the field's terms | `host:/web-[0-9]+/` |
+| `field:[a TO b]`, `field:{a TO b}` | A range, `[ ]` inclusive and `{ }` exclusive; `*` is an open bound | `status:[500 TO 599]` |
+| `field:>a`, `>=`, `<`, `<=` | An open-ended range | `latency_ms:>1000` |
+| `field:IN [a b c]` | Any of the listed values | `level:IN [ERROR FATAL]` |
+| `field:*` | Rows where the field has a value | `user_id:*` |
+| `field.path:word` | A path inside a JSON, struct or Variant column | `payload.user.city:Lisbon` |
+| `\` | Escapes the next character | `path:\/var\/log` |
+
+Parsing is strict. A query the grammar rejects is an error, never a partial or empty result.
+
+### Things that surprise people
+
+- **Text is matched as the column was indexed.** On a column tokenized with `default`, `Timeout` and `timeout` match the same rows. On a whole-value string column the query must equal the whole value.
+- **No stemming.** `connect` does not match `connection`. Use `connect*`.
+- **Wildcards and regular expressions match whole terms**, not substrings of a term. `*out` matches the term `timeout`; `/out/` does not.
+- **Values in `IN [ … ]` and regular expressions are used verbatim**, without lowercasing.
+- **Field names are case-sensitive.**
+- **A datetime term matches the whole second** it falls in.
+
+## Searching all columns
+
+```sql
+SELECT * FROM events WHERE indexqueryall('timeout');
+```
+
+This searches every text column, including whole-value string columns. Numeric columns and partition columns are not included. On a table with many text columns Spark refuses an all-columns search above a limit set by `indexquery.indexall.maxUnqualifiedFields`; name the columns instead, or raise the limit.
+
+Over a join, apply an all-columns search in a subquery on one table. Spark cannot tell which side it belongs to, so it is refused at analysis.
+
+## Where IndexQuery can be used
+
+`indexquery` is a filter on an IndexTables table. It must reach the table's scan:
+
+- **Apply it before caching.** It cannot run over a DataFrame that is already cached.
+- **It works under `AND`, `OR` and `NOT`** with other predicates.
+- **It cannot be a projected column** or a join condition that Spark evaluates itself. Those fail with an error saying IndexQuery must be pushed to an IndexTables scan; they never silently match everything.
+
+## Errors come early
+
+A typo in the query, an unknown column, a search on a partition column or an empty query fails while the query is planned, before any Spark job runs. A parse error raises `IndexQueryParseException` with the query and the parser's message.
