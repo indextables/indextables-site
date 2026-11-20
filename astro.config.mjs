@@ -3,6 +3,8 @@ import starlight from '@astrojs/starlight';
 import { readFileSync } from 'node:fs';
 import YAML from 'yaml';
 
+// @spec SITE-CONT-LAUNCH-001
+const launched = YAML.parse(readFileSync(new URL('./data/launch.yaml', import.meta.url), 'utf8')).launched === true;
 // @spec SITE-CONT-REDIR-001
 const redirects = Object.fromEntries(
   Object.entries(YAML.parse(readFileSync(new URL('./data/redirects.yaml', import.meta.url), 'utf8'))).map(([from, to]) => [from + '/', to]),
@@ -30,6 +32,7 @@ export default defineConfig({
         Footer: './src/components/Footer.astro',
       },
       head: [
+        ...(launched ? [] : [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' } }]),
         { tag: 'link', attrs: { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'llms.txt' } },
         { tag: 'link', attrs: { rel: 'alternate', type: 'application/rss+xml', href: '/blog/rss.xml', title: 'IndexTables Blog (RSS)' } },
         { tag: 'link', attrs: { rel: 'alternate', type: 'application/atom+xml', href: '/blog/atom.xml', title: 'IndexTables Blog (Atom)' } },
