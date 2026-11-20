@@ -1,7 +1,182 @@
 ---
 title: IndexTables
-description: Fast search and retrieval on lakehouse tables, inside your query engine.
+description: Fast search and retrieval on lakehouse tables, inside Apache Spark and Apache DataFusion. No search cluster.
 template: splash
-lid: { class: authored }
+pagefind: false
+lid:
+  reviewed: a865437
+  fingerprint: 7feb7cddfbb9
+  class: authored
+  cites: [SPARK-RD-IQ, SPARK-RD-FLT, SPARK-RD-AGG, DF-AD-IQ, DF-AD-PUSH, DF-AD-FAC, SPARK-SYNC-CMD]
+engine: [spark, datafusion]
 ---
-placeholder
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Talk from '@c/Talk.astro';
+
+<div class="home">
+
+<p class="eyebrow">Open source · Apache Spark · Apache DataFusion</p>
+<p class="hero-h">Fast <mark>search</mark> and retrieval on lakehouse tables, inside your query engine.</p>
+
+<p class="lede">Full-text search, exact match and range lookups, answered from an index instead of a scan. Store data in an IndexTables table, or add an index to the Delta, Iceberg or Parquet tables you already have. It runs inside Spark and DataFusion, on object storage, with no search cluster to operate.</p>
+
+<p class="cta"><a class="primary" href="/start/spark/">Get started with Spark</a><a href="/start/datafusion/">Get started with DataFusion</a><a href="/learn/what-is-indextables/">What is IndexTables?</a></p>
+
+One query, three kinds of match: words in a message, an exact value, and a time range.
+
+<Tabs syncKey="lang">
+<TabItem label="Spark SQL">
+```sql
+SELECT ts, service, message
+FROM events
+WHERE message indexquery 'connection AND (timeout OR refused)'
+  AND user_id = 'u-48213'
+  AND ts >= TIMESTAMP '2026-11-01 00:00:00';
+```
+</TabItem>
+<TabItem label="PySpark">
+```python
+events = spark.read.format("indextables").load("s3://my-bucket/events")
+
+(events
+  .where("message indexquery 'connection AND (timeout OR refused)'")
+  .where("user_id = 'u-48213' AND ts >= '2026-11-01'")
+  .select("ts", "service", "message")
+  .show())
+```
+</TabItem>
+<TabItem label="Scala">
+```scala
+val events = spark.read.format("indextables").load("s3://my-bucket/events")
+
+events
+  .where("message indexquery 'connection AND (timeout OR refused)'")
+  .where("user_id = 'u-48213' AND ts >= '2026-11-01'")
+  .select("ts", "service", "message")
+  .show()
+```
+</TabItem>
+<TabItem label="DataFusion">
+```sql
+CREATE EXTERNAL TABLE events
+STORED AS INDEXTABLES
+LOCATION 's3://my-bucket/events';
+
+SELECT ts, service, message
+FROM events
+WHERE indexquery(message, 'connection AND (timeout OR refused)')
+  AND user_id = 'u-48213'
+  AND ts >= TIMESTAMP '2026-11-01 00:00:00';
+```
+</TabItem>
+</Tabs>
+
+## What the index answers
+
+<div class="grid c4">
+<div>
+<p class="k">Text search</p>
+
+Words, phrases and boolean combinations in text columns.
+
+`message indexquery '"disk full" OR quota'`
+</div>
+<div>
+<p class="k">Exact match</p>
+
+One ID among billions of rows, without reading the rest.
+
+`trace_id = '7f3a…'`
+</div>
+<div>
+<p class="k">Range</p>
+
+A time window or a numeric band, pruned by file and then by index.
+
+`ts BETWEEN … AND …`
+</div>
+<div>
+<p class="k">Counts and totals</p>
+
+`COUNT`, `SUM`, `MIN`, `MAX` and grouped results computed in the index.
+
+`SELECT service, count(*) … GROUP BY service`
+</div>
+</div>
+
+Ordinary SQL filters and aggregates are pushed to the index where it can answer them exactly. Where it cannot, the engine computes the result itself or the query is refused, according to a policy you set. See [filters](/guides/query/filters/) and [aggregates](/guides/query/aggregates/).
+
+## How it works
+
+<div class="grid c3 steps3">
+<div>
+### Write a table, or index one
+Write a DataFrame with `format("indextables")`, or run `BUILD INDEXTABLES COMPANION` over an existing Delta, Iceberg or Parquet table.
+</div>
+<div>
+### The index lives in object storage
+Immutable index files and a transaction log sit under one path on S3, Azure, GCS or local disk. There is no server to run.
+</div>
+<div>
+### Your engine reads it directly
+Spark executors or DataFusion partitions open the index files they need, cache them locally, and return rows or aggregates.
+</div>
+</div>
+
+<div class="grid c2">
+<div>
+### Standalone table
+The index is the table. IndexTables stores the rows and the index together, and you read and write it like any other Spark data source.
+
+[Create a standalone table](/guides/tables/write/)
+</div>
+<div>
+### Companion table
+An index over a table you already have. Rows stay in your Delta, Iceberg or Parquet files; the companion holds the index and keeps up with the source through incremental sync.
+
+[Build a companion](/guides/companions/overview/)
+</div>
+</div>
+
+## Choose your path
+
+<div class="grid c3">
+<a class="card" href="/learn/what-is-indextables/"><p class="k">New here</p><h3>The idea in plain words</h3><p>What an index is, why scans are slow, and where IndexTables fits. No Spark knowledge needed.</p></a>
+<a class="card" href="/start/spark/"><p class="k">Spark developer</p><h3>First search in Spark</h3><p>Write a small table and search it in SQL, PySpark or Scala.</p></a>
+<a class="card" href="/start/datafusion/"><p class="k">Rust developer</p><h3>First search in DataFusion</h3><p>Register a table in a DataFusion session and query it from Rust.</p></a>
+<a class="card" href="/guides/companions/overview/"><p class="k">Have Delta or Iceberg</p><h3>Index tables you already have</h3><p>Build a companion, keep it in sync, and query it by the source table's name.</p></a>
+<a class="card" href="/guides/catalogs/overview/"><p class="k">Platform owner</p><h3>Catalogs and credentials</h3><p>Hive Metastore, Glue, Unity Catalog credentials, Iceberg REST, and what each supports.</p></a>
+<a class="card" href="/guides/migrate/from-0-5/"><p class="k">Using 0.5.x</p><h3>Move to the rebuild</h3><p>Your tables stay readable. See what changed in settings, commands and behavior.</p></a>
+</div>
+
+## Prefer to watch?
+
+A 36-minute conference talk on the problem, the design and how it is used.
+
+<Talk />
+
+## What works today
+
+IndexTables is being rebuilt from written requirements, and every page here is checked against them. The [availability matrix](/reference/availability/) is computed from those requirements, so it says what is implemented, not what is planned.
+
+<div class="grid c3">
+<div>
+<p class="k">Engines</p>
+
+Spark 3.5 and 4.2, Spark Connect, and a DataFusion adapter for Rust.
+</div>
+<div>
+<p class="k">Storage</p>
+
+Local disk and S3-compatible storage for reads and writes. Azure and GCS for reads; writes there are planned.
+</div>
+<div>
+<p class="k">Sources</p>
+
+Companions over Parquet directories, Delta tables and Iceberg tables, with row-level deletes honoured.
+</div>
+</div>
+
+<p class="cta"><a href="/reference/availability/">See the full matrix</a><a href="/why/how-this-site-is-verified/">How these docs are verified</a></p>
+
+</div>

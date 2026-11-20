@@ -1,0 +1,117 @@
+---
+title: Unity Catalog
+description: Use Unity Catalog credentials to read and write IndexTables tables by path, and build companions over governed tables. Registration in Unity Catalog is refused.
+sidebar: { order: 5 }
+lid:
+  reviewed: a865437
+  fingerprint: cb25db2a47bd
+  class: derived
+  cites: [SPARK-CFG-CRED, SPARK-CAT-UNS, SPARK-CAT-CRED, SPARK-CFG-ID]
+  docs: [spark/config-auth/config-auth-design.md#Unity Catalog credential vending]
+engine: [spark]
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Unity Catalog does two separate jobs: it holds table names, and it issues short-lived storage credentials. IndexTables uses the second and not the first.
+
+| | Supported |
+|---|---|
+| Storage credentials from Unity Catalog for a path on S3 | Yes |
+| Reading and writing IndexTables tables by path with those credentials | Yes |
+| Building a companion over a Unity Catalog Delta or Iceberg table | Yes |
+| Registering an IndexTables table in Unity Catalog | No |
+| Unity Catalog credentials for Azure or GCS | Not yet |
+
+## Why registration is refused
+
+Unity Catalog accepts a fixed list of table formats, and IndexTables is not one of them. A `CREATE TABLE … USING indextables` whose target is a Unity Catalog catalog fails before anything is written. The error says that Unity Catalog cannot register an IndexTables table, and that the table is reached by its location with Unity Catalog path credentials.
+
+IndexTables never registers a table under another format's name to work around this.
+
+## Read and write by path
+
+Select the built-in credential provider and tell it how to reach the workspace. Use an external location you have been granted in Unity Catalog.
+
+<Tabs>
+<TabItem label="API token">
+```python
+spark.conf.set("spark.indextables.aws.credentialsProviderClass",
+               "io.indextables.spark.auth.unity.UnityCatalogAWSCredentialProvider")
+spark.conf.set("spark.indextables.databricks.workspaceUrl", "https://<workspace>.cloud.databricks.com")
+spark.conf.set("spark.indextables.databricks.apiToken", dbutils.secrets.get("scope", "token"))
+```
+</TabItem>
+<TabItem label="OAuth client credentials">
+```python
+spark.conf.set("spark.indextables.aws.credentialsProviderClass",
+               "io.indextables.spark.auth.unity.UnityCatalogAWSCredentialProvider")
+spark.conf.set("spark.indextables.databricks.workspaceUrl", "https://<workspace>.cloud.databricks.com")
+spark.conf.set("spark.indextables.databricks.clientId", dbutils.secrets.get("scope", "client-id"))
+spark.conf.set("spark.indextables.databricks.clientSecret", dbutils.secrets.get("scope", "client-secret"))
+```
+</TabItem>
+</Tabs>
+
+```python
+root = "s3://governed-bucket/indextables/events"
+
+df.write.format("indextables").mode("append").save(root)
+
+spark.read.format("indextables").load(root) \
+     .where("message indexquery 'timeout'").show()
+```
+
+The provider asks Unity Catalog for temporary credentials for the table's location, uses them on the driver and executors, and renews them before they expire. No static keys are configured.
+
+Keep tokens and secrets in a secret store. They are never accepted as table properties.
+
+## Read-only principals
+
+A principal with read-only access to the location cannot obtain read-write credentials. Tell the provider to ask for read credentials only:
+
+```python
+spark.conf.set("spark.indextables.databricks.credential.operation", "PATH_READ")
+```
+
+Without this setting the provider asks for the access each operation needs: read for queries, read-write for writes and maintenance.
+
+## Companions over Unity Catalog tables
+
+<Tabs>
+<TabItem label="Delta, by name">
+```sql
+BUILD INDEXTABLES COMPANION FOR DELTA 'main.logs.events'
+  AT LOCATION 's3://governed-bucket/indexes/events';
+```
+The name is resolved to the table's location through Unity Catalog, and credentials for the source are issued for that table.
+</TabItem>
+<TabItem label="Iceberg">
+```sql
+BUILD INDEXTABLES COMPANION FOR ICEBERG 'logs.events'
+  CATALOG 'main' TYPE 'rest'
+  AT LOCATION 's3://governed-bucket/indexes/events';
+```
+With the Unity Catalog provider configured and no `spark.indextables.iceberg.uri` set, the catalog is the workspace's Iceberg REST endpoint.
+</TabItem>
+</Tabs>
+
+**Put the companion in an external location.** Unity Catalog issues path credentials for external locations only, never for storage under a managed table. A companion placed under a managed table's own directory cannot be written.
+
+## Query by the source table's name
+
+To search a companion as `idx.main.logs.events`, add the read-only [companion lookup catalog](/guides/catalogs/companion-lookup/).
+
+## Settings
+
+| Key (`spark.indextables.`) | Purpose |
+|---|---|
+| `aws.credentialsProviderClass` | Set to the provider class above |
+| `databricks.workspaceUrl` | The workspace address |
+| `databricks.apiToken` | A personal access token, or |
+| `databricks.clientId`, `databricks.clientSecret` | OAuth client credentials |
+| `databricks.credential.operation` | `PATH_READ` to restrict to reads |
+| `databricks.oauth.scope`, `databricks.retry.attempts`, `databricks.credential.refreshBuffer.minutes` | Tuning |
+
+Defaults are in the [configuration reference](/reference/configuration/).
+
+How IndexTables checks access to individual objects is being revised upstream. See [the access model](/guides/storage/access-model/).

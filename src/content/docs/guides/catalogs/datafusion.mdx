@@ -1,0 +1,80 @@
+---
+title: Catalogs in DataFusion
+description: Register tables with CREATE EXTERNAL TABLE, or serve many tables by name through the read-only catalog provider.
+sidebar: { order: 8 }
+lid:
+  reviewed: a865437
+  fingerprint: 18a0d1a6e3bf
+  class: derived
+  cites: [DF-AD-FAC, DF-AD-CAT, DF-AD-PROV, CORE-CAT-ENT, CORE-CAT-VAL]
+engine: [datafusion]
+---
+
+DataFusion has no persistent catalog of its own; the embedding application supplies one. The adapter offers two ways to give tables names.
+
+## One table at a time: `CREATE EXTERNAL TABLE`
+
+Register the table factory when building the session (see [Get started](/start/datafusion/)), then:
+
+```sql
+CREATE EXTERNAL TABLE events
+STORED AS INDEXTABLES
+LOCATION 's3://my-bucket/events';
+
+SELECT count(*) FROM events WHERE indexquery(message, 'timeout');
+```
+
+- No column list is needed; the schema comes from the table. If you give one, or `PARTITIONED BY`, it must match the table.
+- The statement registers an existing table. It writes nothing and cannot create a table.
+- Exactly one location is required. Clauses the factory cannot honour are refused before any storage access.
+- The registration remembers the identity of the table it found. If the location is later replaced by a different table, queries fail instead of silently reading the other table.
+
+Storage settings for the location come from the resolver you gave the factory. A key map holds Hadoop-style storage keys:
+
+```rust
+let resolver: KeyMapResolver = Arc::new(|root: &str| {
+    let mut keys = KeyMap::new();
+    if root.starts_with("s3://my-bucket/") {
+        keys.insert("fs.s3a.access.key".into(), std::env::var("AWS_ACCESS_KEY_ID").ok()?);
+        keys.insert("fs.s3a.secret.key".into(), std::env::var("AWS_SECRET_ACCESS_KEY").ok()?);
+    }
+    Some(keys)
+});
+```
+
+## Many tables: the catalog provider
+
+`IndexTablesCatalogProvider` serves tables by name from a list your application owns. You implement one trait, `EntrySource`, which answers three questions: which schemas exist, which tables a schema has, and where a named table is.
+
+```rust
+use indextables_datafusion::{EntrySource, IndexTablesCatalogProvider};
+
+#[derive(Debug)]
+struct MyEntries { /* your metastore client, a config file, a map … */ }
+
+#[async_trait::async_trait]
+impl EntrySource for MyEntries {
+    fn schema_names(&self) -> Vec<String> { vec!["logs".into()] }
+    fn entry_names(&self, schema: &str) -> Vec<String> { /* table names */ vec![] }
+    async fn fetch(&self, schema: &str, name: &str)
+        -> datafusion::error::Result<Option<pb::CatalogEntry>> {
+        /* return the entry: its name, location and, if known, table identity */
+        Ok(None)
+    }
+}
+
+let catalog = IndexTablesCatalogProvider::new(Arc::new(MyEntries { }), resolver);
+ctx.register_catalog("idx", Arc::new(catalog));
+
+ctx.sql("SELECT * FROM idx.logs.events WHERE indexquery(message, 'timeout')").await?;
+```
+
+`pb::CatalogEntry` is the same engine-neutral entry the Spark binding uses, so an application can serve the names a Spark session catalog holds.
+
+### Read-only
+
+The provider registers and deregisters nothing: `register_table` and `deregister_table` return an error. Entries are validated against the table at their location when loaded, so a name that points at a deleted or replaced table fails with an error naming the entry.
+
+### Not included yet
+
+Ready-made entry sources for Glue, Hive Metastore and Polaris are deferred. Today the entry source is yours to write.

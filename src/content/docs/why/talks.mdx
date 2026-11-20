@@ -1,0 +1,36 @@
+---
+title: Talks and videos
+description: A 36-minute conference talk on the problem IndexTables solves, its design and how it is used.
+sidebar: { order: 2 }
+lid:
+  class: authored
+---
+import Talk from '@c/Talk.astro';
+
+## Indexed and Full-Text Search in the Lakehouse
+
+Scott Schenkein, the author of IndexTables, explains why retrieval on lakehouse tables is slow, how an index in object storage changes that, and how the pieces fit together. Published by Databricks Events on 26 June 2026.
+
+<Talk />
+
+[Watch on YouTube](https://www.youtube.com/watch?v=PqLCqE4zOY0)
+
+### What to read after each part
+
+| In the talk | On this site |
+|---|---|
+| Full-table scans and why pruning is not enough | [Why IndexTables](/why/why-indextables/) |
+| Introducing IndexTables | [What is IndexTables?](/learn/what-is-indextables/) |
+| Architecture | [Architecture](/concepts/architecture/) |
+| The IndexQuery operator | [Search text with IndexQuery](/guides/query/indexquery/) |
+| Companion mode | [Standalone and companion tables](/concepts/standalone-and-companion/) |
+| Pre-warming the cache | [Caches and prewarm](/guides/operations/caches-and-prewarm/) |
+
+### What has changed since the talk
+
+The talk was recorded for IndexTables 0.5.x. Since then the engine has been rebuilt:
+
+- The benchmark figures in the talk were measured on 0.5.x. Figures for the current version are not published yet.
+- DataFusion is now a second supported engine beside Spark.
+- Iceberg and Delta companions honour row-level deletes, and sync incrementally.
+- Some settings and commands changed. See [Migrate from 0.5.x](/guides/migrate/from-0-5/).

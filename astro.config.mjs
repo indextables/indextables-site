@@ -11,6 +11,7 @@ export default defineConfig({
     '/docs/getting-started/quickstart/': '/start/spark/',
     '/docs/category/configuration/': '/reference/configuration/',
   },
+  vite: { resolve: { alias: { '@c': new URL('./src/components', import.meta.url).pathname } } },
   integrations: [
     starlight({
       title: 'IndexTables',

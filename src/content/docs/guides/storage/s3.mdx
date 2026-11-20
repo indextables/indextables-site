@@ -1,0 +1,103 @@
+---
+title: S3 and S3-compatible storage
+description: Table locations, credentials, custom endpoints, and separate credentials for companion sources.
+sidebar: { order: 1 }
+lid:
+  reviewed: a865437
+  fingerprint: 66b3df61d1cb
+  class: derived
+  cites: [CORE-STO-LOC, CORE-STO-CFG, CORE-STO-CRED, CORE-STO-OP, CORE-STO-MPU, SPARK-CFG-STO, SPARK-CFG-CRED, SPARK-CFG-SRC]
+engine: [spark, datafusion]
+---
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+S3 and S3-compatible stores support reads and writes. A table location is `s3://bucket/path` or `s3a://bucket/path`; both mean the same.
+
+## Credentials
+
+Credentials are resolved for each table location. Choose one of these.
+
+<Tabs>
+<TabItem label="Instance or environment">
+Set nothing. On EMR, EC2, EKS and similar, the AWS default provider chain supplies credentials from the instance role or environment.
+
+```python
+spark.conf.set("spark.indextables.aws.region", "eu-west-1")
+```
+</TabItem>
+<TabItem label="Static keys">
+```python
+spark.conf.set("spark.indextables.aws.accessKey", access_key)
+spark.conf.set("spark.indextables.aws.secretKey", secret_key)
+spark.conf.set("spark.indextables.aws.sessionToken", session_token)   # if temporary
+spark.conf.set("spark.indextables.aws.region", "eu-west-1")
+```
+Read keys from a secret store. Do not put them in code or notebooks.
+</TabItem>
+<TabItem label="Hadoop configuration">
+Existing `fs.s3a.*` settings are used when no IndexTables key overrides them.
+
+```text
+spark.hadoop.fs.s3a.access.key=…
+spark.hadoop.fs.s3a.secret.key=…
+```
+</TabItem>
+<TabItem label="Custom provider">
+```python
+spark.conf.set("spark.indextables.aws.credentialsProviderClass",
+               "com.example.MyCredentialsProvider")
+```
+The class must implement an AWS SDK credentials-provider interface. A class that does not fails loudly. Providers run wherever storage is accessed, on the driver and on executors, so long jobs always have fresh credentials.
+</TabItem>
+<TabItem label="Unity Catalog">
+See [Unity Catalog](/guides/catalogs/unity-catalog/).
+</TabItem>
+</Tabs>
+
+Credentials can also be given per operation as read or write options. They are never accepted as table properties, so they cannot be stored in a table by mistake.
+
+## Order of precedence
+
+A setting is taken from the first place that has it:
+
+1. Options on the read, write or command.
+2. Table properties in the table's transaction log (not credentials).
+3. The Spark session configuration.
+4. `spark.indextables.*` keys in the Hadoop configuration.
+
+Storage keys from Hadoop (`fs.s3a.*`) apply below all of these. Keys are case-insensitive.
+
+## S3-compatible stores
+
+For MinIO, Ceph, Cloudflare R2 and similar:
+
+```python
+spark.conf.set("spark.indextables.s3.endpoint", "https://minio.internal:9000")
+spark.conf.set("spark.indextables.s3.pathStyleAccess", "true")
+```
+
+**Commits need put-if-absent.** IndexTables commits by writing a version file only if it does not already exist. The store must honour conditional puts. Stores that do not can lose a concurrent commit. `s3.conditionalPut` controls the mechanism used.
+
+## Companion sources in another bucket or account
+
+A companion reads from two places: its own location and its source table. Give the source its own credentials when they differ:
+
+```python
+spark.conf.set("spark.indextables.companion.parquet.aws.accessKey", source_key)
+spark.conf.set("spark.indextables.companion.parquet.aws.secretKey", source_secret)
+spark.conf.set("spark.indextables.companion.parquet.aws.region", "us-east-1")
+```
+
+When any source credential key is set, the source uses those keys alone and does not fall back to the index's credentials. Both building and querying a companion need them.
+
+## Uploads and retries
+
+Large index files are uploaded in parts. The thresholds, part size, concurrency and retry count are under `storage.multipart.*` and `storage.retry.*` in the [configuration reference](/reference/configuration/).
+
+## Locations with embedded credentials
+
+A location of the form `s3://user:password@bucket/…` is refused. Credentials belong in configuration.
+
+## DataFusion
+
+The adapter takes storage settings from the key-map resolver you supply, as Hadoop-style keys. See [Catalogs in DataFusion](/guides/catalogs/datafusion/).

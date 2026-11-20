@@ -3,7 +3,7 @@
 # `note` states a limit that the cited specs record as deferred or refused.
 - area: Tables
   rows:
-    - { feature: Create, append and overwrite, engine: [spark], cites: [SPARK-WR-MODE, SPARK-WR-CMT], link: /guides/tables/write/ }
+    - { feature: 'Create, append and overwrite', engine: [spark], cites: [SPARK-WR-MODE, SPARK-WR-CMT], link: /guides/tables/write/ }
     - { feature: Partitioning and pruning, engine: [spark, datafusion], cites: [CORE-PE, SPARK-RD-PART, DF-AD-PART], link: /guides/tables/partitioning/ }
     - { feature: Field types and tokenizers, engine: [spark], cites: [CORE-FM], link: /guides/tables/field-types/ }
     - { feature: Variant columns (Spark 4.2), engine: [spark], cites: [CORE-FM-JSON], link: /guides/tables/variant/, note: Top-level columns only }
@@ -34,8 +34,8 @@
   rows:
     - { feature: Local and S3-compatible storage, engine: [spark, datafusion], cites: [CORE-STO-OP, CORE-STO-MPU], link: /guides/storage/s3/ }
     - { feature: Azure and GCS reads, engine: [spark, datafusion], cites: [CORE-STO-CRED], link: /guides/storage/azure-gcs/ }
-    - { feature: Azure and GCS writes, engine: [spark], cites: [CORE-STO-OP], link: /guides/storage/azure-gcs/, force: planned, note: Puts, uploads and deletes are disabled until validated against the real services }
-    - { feature: Unity Catalog credentials (S3), engine: [spark], cites: [SPARK-CFG-CRED, SPARK-CAT-CRED], link: /guides/storage/unity-catalog/ }
+    - { feature: Azure and GCS writes, engine: [spark], cites: [CORE-STO-OP], link: /guides/storage/azure-gcs/, force: planned, note: 'Puts, uploads and deletes are disabled until validated against the real services' }
+    - { feature: Unity Catalog credentials (S3), engine: [spark], cites: [SPARK-CFG-CRED, SPARK-CAT-CRED], link: /guides/catalogs/unity-catalog/ }
 - area: Maintenance and operations
   rows:
     - { feature: MERGE SPLITS, engine: [spark], cites: [SPARK-MNT-MRG], link: /guides/maintenance/merge-splits/ }

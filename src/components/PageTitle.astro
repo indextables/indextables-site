@@ -6,7 +6,7 @@ const d = entry.data as any;
 const mdHref = '/' + (id === '' || id === 'index' ? 'index' : id.replace(/\/$/, '')) + '.md';
 const showMeta = d.template !== 'splash';
 ---
-<h1 id="_top">{d.title}</h1>
+<h1 id="_top" class:list={{ "sr-only": !showMeta }}>{d.title}</h1>
 {showMeta && (
   <div class="page-meta">
     {d.engine.map((e: keyof typeof ENGINE) => <span class="eng">{ENGINE[e]}</span>)}
