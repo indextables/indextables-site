@@ -92,6 +92,8 @@ th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vert
 th{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--ink)}
 .badge{display:inline-flex;align-items:center;gap:5px;font:600 11.5px var(--mono);padding:2px 7px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
 .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.md{float:right;font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--rule);padding:1px 7px;text-decoration:none;background:var(--card)}
+.cat h2{font:600 22px var(--serif);margin:34px 0 4px}.cat table{margin:10px 0 0}
 .eng{display:inline-block;font:500 11.5px var(--mono);background:var(--paper2);border:1px solid var(--rule);padding:1px 6px;border-radius:2px}
 .b-ok{color:var(--ok)}.b-plan{color:var(--plan)}.b-def{color:var(--defer)}
 .spec{display:inline-block;font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--rule);background:var(--card);padding:1px 6px;border-radius:2px;cursor:pointer;position:relative;vertical-align:1px}
@@ -286,8 +288,10 @@ events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span clas
       <tr><td>Tables</td><td>Create, append, overwrite, partition</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
       <tr><td>Search</td><td>IndexQuery, filter pushdown, exact aggregate pushdown</td><td><span class="eng">Spark</span> <span class="eng">DataFusion</span></td><td><span class="badge b-ok">Available</span></td></tr>
       <tr><td>Streaming</td><td>Structured Streaming source</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
-      <tr><td>Companions</td><td>Index an existing Parquet directory without copying it</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
-      <tr><td>Companions</td><td>Delta and Iceberg build and incremental sync</td><td><span class="eng">Spark</span></td><td><span class="badge b-plan">Planned</span></td></tr>
+      <tr><td>Companions</td><td>Index an existing Parquet directory, Delta table or Iceberg table without copying it; incremental and streaming sync</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Catalogs</td><td>Create, register, read and write tables by name in the Spark session catalog (Hive Metastore, Glue; beside Delta or Iceberg)</td><td><span class="eng">Spark</span></td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Catalogs</td><td>Register a table by name; read-only catalog provider</td><td><span class="eng">DataFusion</span></td><td><span class="badge b-ok">Available</span></td></tr>
+      <tr><td>Storage</td><td>Writes to Azure and Google Cloud Storage</td><td><span class="eng">Spark</span></td><td><span class="badge b-plan">Planned</span></td></tr>
       <tr><td>Tables</td><td>Writes from DataFusion</td><td><span class="eng">DataFusion</span></td><td><span class="badge b-def">Deferred</span></td></tr>
     </table>
     <p style="margin-top:14px"><a href="#ref">Full feature status →</a></p>
@@ -301,7 +305,7 @@ events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span clas
     </div>
     <div class="proof">
       <p style="margin-bottom:.6em">A read that names no table root fails with <code>Path is required…</code>
-      <span class="spec" tabindex="0">SPARK-RD-SRC-004<span class="pop"><b>SPARK-RD-SRC-004 · implemented</b>If an IndexTables read names no table root, then the binding shall fail with the error <code>Path is required. Use load("path") or .option("path", "value").load()</code>.<small>spark/read · verified at upstream e947724</small></span></span></p>
+      <span class="spec" tabindex="0">SPARK-RD-SRC-004<span class="pop"><b>SPARK-RD-SRC-004 · implemented</b>If an IndexTables read names no table root, then the binding shall fail with the error <code>Path is required. Use load("path") or .option("path", "value").load()</code>.<small>spark/read · verified at upstream 227e84f</small></span></span></p>
       <p style="margin:0;color:var(--muted);font-size:14px">Hover or focus the tag.</p>
     </div>
   </div></section>
@@ -413,7 +417,7 @@ events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span clas
     <div class="next"><a href="#guide"><small>Next</small>Your first table: types, text fields, partitions</a><a href="#ref"><small>Reference</small>Every configuration key</a></div>
   </article>
   <aside class="side r"><h4>On this page</h4><a href="#start">Start Spark</a><a href="#start">Write three rows</a><a href="#start">Search</a>
-    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-WR</span><span class="spec">SPARK-RD-SRC</span><span class="spec">CORE-QRY-IQ</span><span class="spec">DF-AD-FAC</span><span class="spec">DF-AD-IQ</span><p>Upstream <code>e947724</code> · code on this page runs in CI</p></div></aside>
+    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-WR</span><span class="spec">SPARK-RD-SRC</span><span class="spec">CORE-QRY-IQ</span><span class="spec">DF-AD-FAC</span><span class="spec">DF-AD-IQ</span><p>Upstream <code>227e84f</code> · code on this page runs in CI</p></div></aside>
 </div></main>
 
 <!-- GUIDE -->
@@ -422,9 +426,10 @@ events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span clas
     <h4>Write and index</h4><a href="#guide">Create and append</a><a href="#guide">Field types and tokenizers</a><a href="#guide">Partitioning</a>
     <h4>Maintain</h4><a href="#guide">Merge splits</a><a href="#guide">Checkpoints</a><a href="#guide">Purge</a>
     <h4>DataFusion</h4><a href="#start">Register a table</a><a href="#guide">Pushdown and aggregates</a><a href="#guide">Catalog provider</a><a href="#guide">Comet</a>
-    <h4>Companions</h4><a href="#guide">Build over Parquet</a><a href="#guide">Delta and Iceberg sync <span class="badge b-plan" style="font-size:9.5px;padding:0 4px">Planned</span></a></aside>
+    <h4>Companions</h4><a href="#guide">Build over Parquet</a><a href="#guide">Delta and Iceberg sync</a>
+    <h4>Catalogs</h4><a href="#catalog">Use tables by name</a><a href="#catalog">Hive Metastore and Glue</a><a href="#catalog">Beside Delta and Iceberg</a><a href="#catalog">Unity Catalog</a><a href="#catalog">Companion lookup catalog</a></aside>
   <article>
-    <div class="crumb">Guides / Query / Read modes and limits &nbsp; <span class="eng">Spark</span></div>
+    <div class="crumb">Guides / Query / Read modes and limits &nbsp; <span class="eng">Spark</span> <a class="md" href="#guide">View as Markdown</a></div>
     <h1>Choose a read mode</h1>
     <div class="forwho"><b>For</b>analysts and engineers querying a table. <b style="margin-left:10px">You will</b>know when results are complete and how to make them so.</div>
     <p>IndexTables has two read modes. Both return only correct rows. They differ in <em>how many</em> matching rows an interactive query brings back.</p>
@@ -439,16 +444,115 @@ events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span clas
 <pre data-l="scala" hidden>spark.read.format(<span class="s">"indextables"</span>)
   .option(<span class="s">"spark.indextables.read.mode"</span>, <span class="s">"exact"</span>).load(root)</pre></div>
     <h2>What fast mode never limits</h2>
-    <p>The limit applies to rows returned to you. It never shortens the input to a write, a cache, a join or an aggregate. <span class="spec" tabindex="0">SPARK-RD-MODE<span class="pop"><b>SPARK-RD-MODE · group</b>Read modes and the fast-mode cap.<small>spark/read · verified at upstream e947724</small></span></span></p>
+    <p>The limit applies to rows returned to you. It never shortens the input to a write, a cache, a join or an aggregate. <span class="spec" tabindex="0">SPARK-RD-MODE<span class="pop"><b>SPARK-RD-MODE · group</b>Read modes and the fast-mode cap.<small>spark/read · verified at upstream 227e84f</small></span></span></p>
     <div class="note"><b>Using DataFusion?</b> Fast mode is a Spark feature today. DataFusion queries return every matching row.</div>
     <div class="note"><b>Why a default limit at all?</b> See <a href="#guide">Concepts: exact, bounded, never approximate</a>.</div>
     <div class="next"><a href="#guide"><small>Next</small>Aggregates and what is pushed down</a><a href="#ref"><small>Reference</small><code>spark.indextables.read.*</code> keys</a></div>
   </article>
   <aside class="side r"><h4>On this page</h4><a href="#guide">Switch to exact</a><a href="#guide">What fast mode never limits</a>
-    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-RD-MODE</span><span class="spec">SPARK-RD-LIM</span><p>Upstream <code>e947724</code> · reviewed 2026-11-17</p><p><a href="#guide">Edit this page</a> · <a href="#guide">Report a problem</a></p></div></aside>
+    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-RD-MODE</span><span class="spec">SPARK-RD-LIM</span><p>Upstream <code>227e84f</code> · reviewed 2026-11-17</p><p><a href="#guide">Edit this page</a> · <a href="#guide">Report a problem</a></p></div></aside>
 </div></main>
 
 <!-- REFERENCE -->
+<main class="view" id="v-catalog"><div class="docs">
+  <aside class="side"><h4>Catalogs</h4><a class="on" href="#catalog">Use tables by name</a><a href="#catalog">Hive Metastore and Glue</a><a href="#catalog">Beside Delta and Iceberg</a><a href="#catalog">Unity Catalog</a><a href="#catalog">Companion lookup catalog</a>
+    <h4>Query</h4><a href="#guide">Read modes and limits</a></aside>
+  <article class="cat">
+    <div class="crumb">Guides / Catalogs / Use tables by name &nbsp; <span class="eng">Spark</span> <span class="eng">DataFusion</span> <a class="md" href="#catalog">View as Markdown</a></div>
+    <h1>Use tables by <mark>name</mark></h1>
+    <div class="forwho"><b>For</b>anyone who wants <code>SELECT … FROM sales.events</code> instead of a storage path. <b style="margin-left:10px">You will</b>find the example for your catalog and copy it.</div>
+    <table><tr><th>Your catalog</th><th>What works</th><th>Example</th></tr>
+      <tr><td>Spark session catalog on Hive Metastore, Glue or in-memory</td><td>Create, register, read, write, rename, drop</td><td><a href="#catalog">1, 2, 3</a></td></tr>
+      <tr><td>The same, with Delta or Iceberg installed as the session catalog</td><td>The same. Their catalog classes stay as they are</td><td><a href="#catalog">4</a></td></tr>
+      <tr><td>Unity Catalog</td><td>Cannot hold an IndexTables table. Read and write by path with Unity Catalog credentials</td><td><a href="#catalog">5</a></td></tr>
+      <tr><td>Iceberg REST, Glue or Hive Metastore, as the source of a companion</td><td>Build and sync a companion from a catalog table</td><td><a href="#catalog">6</a></td></tr>
+      <tr><td>Companion lookup catalog</td><td>Query a table's companion under the source table's own name. Read-only</td><td><a href="#catalog">7</a></td></tr>
+      <tr><td>DataFusion</td><td>Register by name for the session; read-only catalog provider</td><td><a href="#catalog">8</a></td></tr>
+    </table>
+
+    <h2>1. Register a table that already exists</h2>
+    <div class="code"><pre><span class="k">CREATE TABLE</span> sales.events <span class="k">USING</span> indextables
+<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/events'</span>;
+
+<span class="k">SELECT</span> ts, message <span class="k">FROM</span> sales.events <span class="k">WHERE</span> message <span class="k">indexquery</span> <span class="s">'timeout'</span>;</pre></div>
+    <div class="note"><b>The name holds a location, not a schema.</b> Columns and partitions always come from the table itself, so they cannot drift. <span class="spec">SPARK-CAT-ENT</span></div>
+
+    <h2>2. Create a table by name</h2>
+    <div class="code" data-tabs><div class="tabs"><button class="on" data-l="sql">Spark SQL</button><button data-l="py">PySpark</button><button data-l="scala">Scala</button><button class="copy">copy</button></div>
+<pre data-l="sql"><span class="c">-- empty table with declared columns</span>
+<span class="k">CREATE TABLE</span> sales.events (ts <span class="k">TIMESTAMP</span>, service <span class="k">STRING</span>, message <span class="k">STRING</span>)
+<span class="k">USING</span> indextables <span class="k">PARTITIONED BY</span> (service)
+<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/events'</span>;
+
+<span class="c">-- or from a query</span>
+<span class="k">CREATE TABLE</span> sales.errors <span class="k">USING</span> indextables
+<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/errors'</span>
+<span class="k">AS SELECT</span> * <span class="k">FROM</span> raw.logs <span class="k">WHERE</span> level = <span class="s">'ERROR'</span>;</pre>
+<pre data-l="py" hidden>df.write.format(<span class="s">"indextables"</span>) \
+  .option(<span class="s">"path"</span>, <span class="s">"s3://my-bucket/events"</span>) \
+  .saveAsTable(<span class="s">"sales.events"</span>)
+
+<span class="c"># or with the V2 writer</span>
+df.writeTo(<span class="s">"sales.events"</span>).using(<span class="s">"indextables"</span>) \
+  .tableProperty(<span class="s">"location"</span>, <span class="s">"s3://my-bucket/events"</span>).create()</pre>
+<pre data-l="scala" hidden>df.write.format(<span class="s">"indextables"</span>)
+  .option(<span class="s">"path"</span>, <span class="s">"s3://my-bucket/events"</span>)
+  .saveAsTable(<span class="s">"sales.events"</span>)
+
+<span class="c">// or with the V2 writer</span>
+df.writeTo(<span class="s">"sales.events"</span>).using(<span class="s">"indextables"</span>)
+  .tableProperty(<span class="s">"location"</span>, <span class="s">"s3://my-bucket/events"</span>).create()</pre></div>
+    <div class="note"><b>Always give a location.</b> A create without <code>LOCATION</code> is refused, so a table's files are never owned by the catalog. <span class="spec">SPARK-CAT-DDL</span></div>
+
+    <h2>3. Write, replace, rename, drop</h2>
+    <div class="code"><pre><span class="k">INSERT INTO</span> sales.events <span class="k">SELECT</span> * <span class="k">FROM</span> staging.events;
+<span class="k">INSERT OVERWRITE</span> sales.events <span class="k">SELECT</span> * <span class="k">FROM</span> staging.events;
+<span class="k">REPLACE TABLE</span> sales.errors <span class="k">USING</span> indextables <span class="k">AS SELECT</span> …;
+
+<span class="k">ALTER TABLE</span> sales.events <span class="k">RENAME TO</span> sales.app_events;
+<span class="k">DROP TABLE</span> sales.app_events;   <span class="c">-- removes the name; the files stay</span></pre></div>
+    <div class="note"><b>Dropping a name never deletes data.</b> <span class="spec">SPARK-CAT-ALT</span></div>
+
+    <h2>4. Beside Delta or Iceberg</h2>
+    <p>Keep the session catalog you have. On Spark 4.2 with Spark&#39;s built-in catalog, add one setting:</p>
+    <div class="code"><pre>spark.sql.catalog.spark_catalog=io.indextables.spark.catalog.IndexTablesSessionCatalog</pre></div>
+    <p>With Delta's <code>DeltaCatalog</code> or Iceberg's <code>SparkSessionCatalog</code> installed, change nothing: examples 1 to 3 work as written. <span class="spec">SPARK-CAT-RES</span></p>
+
+    <h2>5. Unity Catalog</h2>
+    <p>Unity Catalog cannot register an IndexTables table. Use the table by path, and let Unity Catalog issue the storage credentials:</p>
+    <div class="code"><pre>spark.indextables.aws.credentialsProviderClass=io.indextables.spark.auth.unity.UnityCatalogAWSCredentialProvider
+spark.indextables.databricks.workspaceUrl=https://&lt;workspace&gt;
+spark.indextables.databricks.apiToken=&lt;token&gt;
+
+spark.read.format(<span class="s">"indextables"</span>).load(<span class="s">"s3://my-bucket/events"</span>)</pre></div>
+    <div class="note"><b>S3 only today.</b> Unity Catalog credentials for Azure and Google Cloud Storage are <span class="badge b-def">Deferred</span> <span class="spec">SPARK-CAT-UNS</span><span class="spec">SPARK-CFG-CRED</span></div>
+
+    <h2>6. Index a table from an Iceberg or Delta catalog</h2>
+    <div class="code"><pre><span class="k">BUILD INDEXTABLES COMPANION FOR ICEBERG</span> <span class="s">'analytics.events'</span>
+  <span class="k">CATALOG</span> <span class="s">'prod'</span> <span class="k">TYPE</span> <span class="s">'rest'</span>        <span class="c">-- rest, glue or hms</span>
+  <span class="k">AT LOCATION</span> <span class="s">'s3://my-bucket/indexes/events'</span>;
+
+<span class="k">BUILD INDEXTABLES COMPANION FOR DELTA</span> <span class="s">'s3://my-bucket/events'</span>
+  <span class="k">AT LOCATION</span> <span class="s">'s3://my-bucket/events/_indextables'</span>;</pre></div>
+
+    <h2>7. Query a companion under the source table's name</h2>
+    <div class="code"><pre>spark.sql.catalog.search=io.indextables.catalog.IndexTablesCatalog
+
+<span class="k">ALTER TABLE</span> prod.analytics.events <span class="k">SET TBLPROPERTIES</span>
+  (<span class="s">'indextables.companion.indexroot'</span> = <span class="s">'s3://my-bucket/indexes'</span>);
+
+<span class="k">SELECT</span> * <span class="k">FROM</span> search.prod.analytics.events <span class="k">WHERE</span> message <span class="k">indexquery</span> <span class="s">'timeout'</span>;</pre></div>
+    <div class="note"><b>Read-only.</b> The lookup catalog finds the companion from a property on the source table. It can pick a root per region. <span class="spec">SPARK-OPS-CAT</span></div>
+
+    <h2>8. DataFusion</h2>
+    <div class="code"><pre><span class="k">CREATE EXTERNAL TABLE</span> events
+<span class="k">STORED AS</span> INDEXTABLES
+<span class="k">LOCATION</span> <span class="s">'s3://my-bucket/events'</span>;</pre></div>
+    <p>The name lasts for the session. For names that persist, your program supplies the entries and the adapter's catalog provider serves them, read-only. <span class="spec">DF-AD-CAT</span><span class="spec">DF-AD-FAC</span></p>
+    <div class="cite"><h4>Verified against</h4><span class="spec">SPARK-CAT</span><span class="spec">CORE-CAT</span><span class="spec">SPARK-OPS-CAT</span><span class="spec">DF-AD-CAT</span><p>Upstream <code>227e84f</code></p></div>
+  </article>
+</div></main>
+
 <main class="view" id="v-ref"><div class="wrap" style="padding-top:30px;padding-bottom:60px">
   <div class="crumb">Reference / Configuration keys</div>
   <h1 style="font-size:2.4rem">Configuration keys</h1>
@@ -483,7 +587,7 @@ events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span clas
 </div></main>
 
 <footer><div class="wrap cols">
-  <div><div class="brand" style="margin-bottom:8px">IndexTables</div>Open source search for the lakehouse.<br>Docs verified against upstream <code>e947724</code>.</div>
+  <div><div class="brand" style="margin-bottom:8px">IndexTables</div>Open source search for the lakehouse.<br>Docs verified against upstream <code>227e84f</code>.<br>For agents: <a href="#home">llms.txt</a> · every page as <a href="#home">Markdown</a></div>
   <div><h4>Learn</h4><a href="#why">Why IndexTables</a><a href="#why">Talks and videos</a><a href="#learn">Plain English</a><a href="#start">Quickstart</a></div>
   <div><h4>Docs</h4><a href="#guide">Guides</a><a href="#guide">Concepts</a><a href="#ref">Reference</a></div>
   <div><h4>Project</h4><a href="#ref">Status and roadmap</a><a href="#guide">How it is built (LID)</a><a href="#ref">Specification</a></div>
@@ -499,7 +603,7 @@ events.where(<span class="s">"message indexquery 'timeout'"</span>)   <span clas
 </div></div>
 
 <script>
-const views=['home','why','learn','start','guide','ref','blog'];
+const views=['home','why','learn','start','guide','catalog','ref','blog'];
 function route(){const h=(location.hash||'#home').slice(1);const v=views.includes(h)?h:'home';
   document.querySelectorAll('.view').forEach(e=>e.classList.toggle('on',e.id==='v-'+v));
   document.querySelectorAll('.nav nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));

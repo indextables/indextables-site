@@ -24,12 +24,12 @@ Intent flows one way. The site never edits upstream. When writing documentation 
 
 ## 2. What was examined
 
-Upstream at commit `e947724` (2026-11-17), LID 1.4.0, Full mode:
+Upstream at commit `227e84f` (2026-11-20), LID 1.4.0, Full mode:
 
 | Item | Finding |
 |---|---|
 | Design tree | 3 roots (`core`, `spark`, `datafusion`), 26 leaf segments under `docs/intent/` |
-| EARS specs | About 6,000 IDs in 26 `*-specs.md` files, shaped `ROOT-LEAF-GROUP-NNN` (for example `SPARK-RD-SRC-004`) |
+| EARS specs | 6,240 IDs (6,200 implemented, 21 active gaps, 19 deferred) in 26 `*-specs.md` files, shaped `ROOT-LEAF-GROUP-NNN` (for example `SPARK-RD-SRC-004`) |
 | Status markers | `[x]` implemented, `[ ]` active gap, `[D]` deferred, per spec |
 | Overlay | `docs/arrows/index.yaml` with per-segment status and counts |
 | Roadmap | `docs/decisions/implementation-roadmap.md` with a `Completed slices:` line |
@@ -48,9 +48,9 @@ LID itself (1.4.x) defines no cross-repository construct that I could find; its 
 ```yaml
 upstream:
   repo: indextables/indextables
-  commit: e947724a19d21a233e5d75f7c9466823b43625ec
+  commit: 227e84f1c89c53ee71e0ae7b881ec8480ff2c5e4
   lid_version: 1.4.0
-  pinned_at: 2026-11-17
+  pinned_at: 2026-11-20
   channel: next          # "next" tracks main; a release channel pins a tag
 ```
 
@@ -77,7 +77,7 @@ upstream:
   specs: [CORE-QRY-IQ, CORE-QRY-IQV, SPARK-RD-IQ-003]   # a group prefix or a single ID
   docs: ["docs/intent/core/query/query-design.md#indexquery"]
 reviewed:
-  commit: e947724                     # upstream commit this page was last checked against
+  commit: 227e84f                     # upstream commit this page was last checked against
   fingerprint: 9c1f…                  # hash over the cited spec texts and markers
 ---
 ```
@@ -234,9 +234,21 @@ An `upstream-map.yaml` beside `docs/arrows/index.yaml` records, for each upstrea
 - Merging.
 - Fixing upstream. Problems found while documenting become upstream issues labelled `intent-gap`.
 
+## 9a. Markdown output for agents
+
+Every page is also published as Markdown, built from the same source in the same build, so the two cannot differ.
+
+| Output | Content |
+|---|---|
+| `<page-url>.md` | The page as plain Markdown: frontmatter with title, engine, status and the cited upstream spec IDs and commit; code blocks with all language tabs expanded; no navigation or scripts |
+| `/llms.txt` | An index of every page with a one-line description, grouped as the navigation is |
+| `/llms-full.txt` | All documentation pages concatenated, for a single fetch |
+
+The Markdown carries the same citations as the HTML, so an agent can check a statement against the requirement it comes from. The `markdown-parity` check fails the build when a page has no Markdown output or when its Markdown lacks a citation the HTML shows.
+
 ## 10. Rollout
 
-Site generation starts once upstream `scripts/spec-check.py` reports no active-gap (`[ ]`) spec. The first pin is that commit, so the first drafting pass runs against settled intent and drift detection begins from a stable baseline.
+Site generation starts once upstream `scripts/spec-check.py` reports no active-gap (`[ ]`) spec. At `227e84f`, 21 remain, in `CORE-AGG-HASH`, `SPARK-SYNC-META`, `SPARK-MNT`, `CORE-OBS`, `CORE-QRY-OBS`, `DF-AD-HAR` and four other groups; the roadmap lists one slice (37) still to complete. The first pin is that commit, so the first drafting pass runs against settled intent and drift detection begins from a stable baseline.
 
 | Step | Result |
 |---|---|

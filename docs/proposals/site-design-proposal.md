@@ -150,7 +150,8 @@ Class: G = generated, D = derived from cited specs, A = authored (see the sync p
 | Streaming | Read a table as a stream; offsets, restarts and change commits | D | `spark/streaming` | new |
 | Catalogs | Register and use tables by name; CTAS and replace; Hive Metastore and Glue; Unity Catalog credential vending | D | `spark/catalog`, `core/catalog-entry`, `spark/config-auth` CRED | new |
 | Maintain | Merge splits; checkpoints; purge; drop partitions; time-travel truncation; repair; merge-on-write and purge-on-write | D | `spark/maintenance`, `core/table-log` | sql-commands/*, advanced/merge-on-write, purge-on-write |
-| Companions | What a companion is; build over a Parquet directory; reconcile; read predecessor Delta companions; table roots; source lifetime rules; Delta and Iceberg sync (planned) | D | `spark/companion-sync`, `core/companion-format`, `core/source-readers` | core-concepts/companion-mode |
+| Companions | What a companion is; build over a Parquet directory, a Delta table or an Iceberg table; incremental sync and the watermark; streaming sync; deletes (Delta deletion vectors, Iceberg position and equality deletes); Iceberg sources through REST, Glue and Hive Metastore catalogs; table roots; source lifetime rules; reading 0.5.x companions | D | `spark/companion-sync`, `core/companion-format`, `core/source-readers` | core-concepts/companion-mode |
+| Catalogs | One page per case in section 5.10, each a complete copy-and-run example | D, executable | `spark/catalog`, `core/catalog-entry`, `spark/operations` CAT, `datafusion/adapter` CAT and FAC, `spark/config-auth` CRED |
 | Cache and memory | Cache tiers; disk cache setup; prewarm; memory sizing | D | `core/cache`, `spark/memory`, `spark/operations` PRE | configuration/cache-settings, memory-management, advanced/l2-disk-cache, sql-commands/prewarm-cache |
 | Storage and credentials | S3 and S3-compatible; Azure; GCS; credential providers and refresh | D | `core/storage`, `spark/config-auth` | configuration/s3-configuration, azure-configuration |
 | Observe and troubleshoot | DESCRIBE commands; the profiler; query traces; CPU profiles; OTLP export; observability without the plugin; troubleshooting by symptom | D | `core/observability`, `spark/operations` | sql-commands/describe-commands, profiler |
@@ -279,6 +280,28 @@ The index answers four kinds of question: text search, exact match, range, and c
 - The plain-language Learn page explains the idea once: the index finds the matching rows without reading the rest, whatever the kind of match.
 - "Fast" is stated as a mechanism (an index lookup instead of a scan). The site publishes no speed figures for the cleanroom until they are measured.
 
+### 5.10 Catalogs
+
+Using tables by name is a Guides area of its own, because the right example depends on the catalog a reader already runs. The area opens with a table, "your catalog / what works / example", and every row links to a complete example.
+
+| Page | Examples it shows |
+|---|---|
+| Use tables by name | Register an existing table; create with a column list; `CREATE TABLE … AS SELECT`; `saveAsTable`; `writeTo(…).create()` and `createOrReplace()`; `INSERT INTO` and `INSERT OVERWRITE`; `REPLACE TABLE … AS SELECT`; `DESCRIBE TABLE`; rename; `SET LOCATION` after a move; drop (the name only) |
+| Hive Metastore and Glue | Session setup for each; one table registered under several names; names shared across regions |
+| Beside Delta and Iceberg | The session-catalog setting for Spark 4.2 with the built-in catalog; unchanged setup under `DeltaCatalog` and Iceberg's `SparkSessionCatalog`; a query joining an IndexTables table to a Delta table by name |
+| Streaming by name | `readStream.table` |
+| Unity Catalog | Why registration is refused and what the error says; reading and writing by path with Unity Catalog credentials (API token and OAuth); read-only principals |
+| Catalog sources for companions | Build and sync from an Iceberg table in a REST, Glue or Hive Metastore catalog; from a Delta table by name; catalog-issued credentials |
+| Companion lookup catalog | Configure the catalog; set the index-root property on the source table; per-region roots; query the companion under the source table's name |
+| DataFusion | `CREATE EXTERNAL TABLE … STORED AS INDEXTABLES`; the read-only catalog provider |
+| What is not supported | Every refused statement and catalog, with the error text and what to do instead, generated from the failure-condition specs |
+
+Each example is executable and runs in CI against the catalog it names where a local one exists (in-memory, Hive Metastore, open-source Unity Catalog, an Iceberg REST catalog). Examples for Glue and Databricks are marked as not run in CI.
+
+### 5.11 Markdown for agents
+
+Every page has a Markdown version at the same URL with `.md` added, and a "View as Markdown" link at the top of the page. `/llms.txt` indexes all pages and `/llms-full.txt` holds the documentation in one file. The Markdown keeps the engine, the status and the cited spec IDs in frontmatter and expands all language tabs, so an agent gets the whole page without running scripts. The sync plan defines the outputs and the parity check (section 9a).
+
 ## 6. Usability rules
 
 These become site EARS specs, so they are checked and not merely intended.
@@ -383,6 +406,7 @@ What the gate buys:
 
 - Derived pages are drafted once, against settled specs, instead of being redrafted as slices land.
 - Executable tutorials can run against a real build from the first page.
+- At upstream `227e84f` (2026-11-20), 21 of 6,240 specs are active gaps and one roadmap slice remains.
 - The first published availability matrix has no "Planned" rows. The Planned badge stays in the design for requirements upstream adds after launch.
 
 | Stage | Contents | Depends on |
