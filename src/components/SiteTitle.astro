@@ -1,5 +1,5 @@
 ---
-// @spec SITE-UI-NAV-001
+// @spec SITE-UI-NAV-001, SITE-UI-NAV-002
 import Default from '@astrojs/starlight/components/SiteTitle.astro';
 const NAV: [string, string][] = [
   ['Why', '/why/why-indextables/'], ['Learn', '/learn/what-is-indextables/'], ['Get started', '/start/spark/'],
@@ -7,10 +7,9 @@ const NAV: [string, string][] = [
 ];
 const SECTION: Record<string, string> = { Why: '/why/', Learn: '/learn/', 'Get started': '/start/', Guides: '/guides/', Concepts: '/concepts/', Reference: '/reference/', Blog: '/blog/' };
 const path = Astro.url.pathname;
-const noSidebar = !Astro.locals.starlightRoute.hasSidebar;
 ---
 <Default><slot /></Default>
-<nav class:list={["topnav", { always: noSidebar }]} aria-label="Sections">
+<nav class="topnav" aria-label="Sections">
   {NAV.map(([label, href]) => <a href={href} aria-current={path.startsWith(SECTION[label]) ? 'page' : undefined}>{label}</a>)}
 </nav>
 <style>
@@ -18,5 +17,5 @@ const noSidebar = !Astro.locals.starlightRoute.hasSidebar;
   .topnav a { font: 500 .9rem var(--sl-font); color: var(--sl-color-gray-2); text-decoration: none; padding: .2rem 0; border-bottom: 2px solid transparent; }
   .topnav a:hover { color: var(--sl-color-white); }
   .topnav a[aria-current='page'] { color: var(--sl-color-white); border-bottom-color: var(--marker); }
-  @media (max-width: 50rem) { .topnav:not(.always) { display: none; } .topnav.always { margin-left: .8rem; gap: .9rem; } }
+  @media (max-width: 71.99rem) { .topnav { display: none; } }
 </style>

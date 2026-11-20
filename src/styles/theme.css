@@ -30,6 +30,9 @@ h1, h2, h3, .site-title { font-family: var(--serif); font-weight: 600; letter-sp
 .sl-markdown-content h2 { margin-top: 2.2em; }
 mark { background: var(--marker); color: #12161C; padding: 0 .12em; }
 header.header { border-bottom: 1px solid var(--rule); }
+/* Splash pages keep their title for screen readers only; collapse its empty panel. */
+.content-panel:has(> .sl-container > h1.sr-only) { padding: 0; }
+.content-panel:has(> .sl-container > h1.sr-only) + .content-panel { border-top: 0; }
 .sl-markdown-content table { font-size: .92rem; }
 .sl-markdown-content th { font: 600 .72rem var(--sl-font-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .sl-markdown-content :is(th, td) { border-bottom: 1px solid var(--rule); }
