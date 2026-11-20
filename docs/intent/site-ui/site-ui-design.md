@@ -22,7 +22,7 @@ A 3×3 table grid with the centre cell filled in marker yellow: a hit found in a
 
 ## Site navigation
 
-The header carries links to the seven sections on every page, so the home page, which has no sidebar, still leads into the documentation. Documentation pages also show the full sidebar. On narrow screens the header links are hidden: documentation pages use the sidebar menu, and the home page ends with a list of the sections.
+On wide screens (72rem and up) the header carries links to the seven sections on every page, so the home page, which has no sidebar, still leads into the documentation; documentation pages also show the full sidebar. Below that width the header links are hidden, because they would no longer fit beside the site name, search and theme controls. Documentation pages keep the sidebar down to 50rem and use the menu button below it. The home page has no sidebar, so it shows the menu button at every width below 72rem, and the menu opens the full sidebar. The home page also ends with cards for the sections.
 
 ## Page header
 

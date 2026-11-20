@@ -30,6 +30,7 @@ export default defineConfig({
         SiteTitle: './src/components/SiteTitle.astro',
         PageTitle: './src/components/PageTitle.astro',
         Footer: './src/components/Footer.astro',
+        PageFrame: './src/components/PageFrame.astro',
       },
       head: [
         ...(launched ? [] : [{ tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' } }]),
