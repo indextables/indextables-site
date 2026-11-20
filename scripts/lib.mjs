@@ -13,6 +13,16 @@ export const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 const MARK = { x: 'implemented', ' ': 'gap', D: 'deferred' };
 const sha = (s, n = 12) => createHash('sha256').update(s).digest('hex').slice(0, n);
 
+// @spec SITE-UI-LOGO-003
+export function staleLogos(record, readSource) {
+  return Object.entries(record)
+    .filter(([source, expected]) => {
+      try { return sha256(readSource(source)) !== expected; }
+      catch { return true; }
+    })
+    .map(([source]) => source);
+}
+
 export function walk(dir, test, out = []) {
   for (const e of readdirSync(dir)) {
     const p = join(dir, e);

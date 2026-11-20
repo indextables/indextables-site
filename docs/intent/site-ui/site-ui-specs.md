@@ -2,7 +2,9 @@
 
 - [x] **SITE-UI-THEME-001**: The site shall use a paper background of `#FAF7F0`, ink `#12161C`, accent `#C23A1E` and marker `#FFD84D` in its light theme, with a dark theme that keeps the marker colour.
 - [x] **SITE-UI-THEME-002**: The site shall set headings in Fraunces, body text in Inter and code in JetBrains Mono, each with a system fallback.
-- [x] **SITE-UI-LOGO-001**: The site's logo and favicon shall be an SVG 3×3 grid with its centre cell filled in the marker colour.
+- [x] **SITE-UI-LOGO-001**: The site's logo and favicon shall be a 3×3 grid with its centre cell filled in the marker colour, kept as SVG sources in `src/assets/`.
+- [x] **SITE-UI-LOGO-002**: The site shall serve its logo, dark-theme logo and favicon as raster images rendered from the SVG sources, and the built site shall contain no SVG file.
+- [x] **SITE-UI-LOGO-003**: When an SVG logo source changes and its raster renders are not regenerated, the site check shall fail.
 - [x] **SITE-UI-META-001**: Every page except splash pages shall show, below its title, one badge per engine in its `engine` list.
 - [x] **SITE-UI-META-002**: Where a page's status is not `available`, the page shall show a status badge below its title.
 - [x] **SITE-UI-CHIP-001**: The spec chip shall show the cited upstream ID or prefix and link to its specs file at the pinned commit.

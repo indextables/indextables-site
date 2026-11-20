@@ -18,7 +18,9 @@ Headlines are set in Fraunces, body in Inter, code in JetBrains Mono. Borders ar
 
 ## Logo
 
-A 3×3 table grid with the centre cell filled in marker yellow: a hit found in a table. It is an SVG that stays legible at 16 px.
+A 3×3 table grid with the centre cell filled in marker yellow: a hit found in a table. It stays legible at 16 px.
+
+The drawings are kept as SVG in `src/assets/` (light logo, dark-theme logo, favicon), and `npm run logos` renders them to PNG, plus a `favicon.ico` and an Apple touch icon. The site serves only those renders: many corporate proxies block or flag any SVG file, because SVG can carry script. The check fails when an SVG source no longer matches the hash recorded at its last render.
 
 ## Site navigation
 
@@ -45,4 +47,5 @@ The presentation video is shown as a poster that loads the player from `youtube-
 | Decision | Chosen | Rejected and why |
 |---|---|---|
 | Fonts | Served from this site, as variable fonts from the `@fontsource-variable` packages, with system fallbacks | A font service sends every reader's address to a third party and adds a connection before text renders |
+| Logo format | SVG sources, served as PNG and ICO renders | Serving the SVG: corporate proxies flag SVG files as possibly malicious, so readers behind them see a warning or a missing logo |
 | Video | Click to load | An eager embed loads third-party scripts and cookies on the home page |

@@ -21,8 +21,7 @@ export default defineConfig({
     starlight({
       title: 'IndexTables',
       description: 'Fast search and retrieval on lakehouse tables, inside your query engine.',
-      logo: { light: './src/assets/logo.svg', dark: './src/assets/logo-dark.svg', alt: '' },
-      favicon: '/favicon.svg',
+      favicon: '/favicon.ico',
       // @spec SITE-UI-FONT-001
       customCss: ['@fontsource-variable/fraunces/opsz.css', '@fontsource-variable/inter/wght.css', '@fontsource-variable/jetbrains-mono/wght.css', './src/styles/theme.css'],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/indextables/indextables' }],
@@ -37,6 +36,7 @@ export default defineConfig({
         { tag: 'link', attrs: { rel: 'alternate', type: 'text/plain', href: '/llms.txt', title: 'llms.txt' } },
         { tag: 'link', attrs: { rel: 'alternate', type: 'application/rss+xml', href: '/blog/rss.xml', title: 'IndexTables Blog (RSS)' } },
         { tag: 'link', attrs: { rel: 'alternate', type: 'application/atom+xml', href: '/blog/atom.xml', title: 'IndexTables Blog (Atom)' } },
+        { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
       ],
       sidebar: [
         dir('Why IndexTables', 'why'),

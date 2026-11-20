@@ -1,6 +1,5 @@
 ---
-// @spec SITE-UI-NAV-001, SITE-UI-NAV-002
-import Default from '@astrojs/starlight/components/SiteTitle.astro';
+// @spec SITE-UI-NAV-001, SITE-UI-NAV-002, SITE-UI-LOGO-002
 const NAV: [string, string][] = [
   ['Why', '/why/why-indextables/'], ['Learn', '/learn/what-is-indextables/'], ['Get started', '/start/spark/'],
   ['Guides', '/guides/catalogs/overview/'], ['Concepts', '/concepts/architecture/'], ['Reference', '/reference/availability/'], ['Blog', '/blog/'],
@@ -8,11 +7,35 @@ const NAV: [string, string][] = [
 const SECTION: Record<string, string> = { Why: '/why/', Learn: '/learn/', 'Get started': '/start/', Guides: '/guides/', Concepts: '/concepts/', Reference: '/reference/', Blog: '/blog/' };
 const path = Astro.url.pathname;
 ---
-<Default><slot /></Default>
+<a href="/" class="site-title sl-flex">
+  <img class="light:sl-hidden print:hidden" src="/logo-dark.png" width="32" height="32" alt="" />
+  <img class="dark:sl-hidden print:block" src="/logo.png" width="32" height="32" alt="" />
+  <span translate="no">IndexTables</span>
+</a>
 <nav class="topnav" aria-label="Sections">
   {NAV.map(([label, href]) => <a href={href} aria-current={path.startsWith(SECTION[label]) ? 'page' : undefined}>{label}</a>)}
 </nav>
 <style>
+  @layer starlight.core {
+    .site-title {
+      align-items: center;
+      gap: var(--sl-nav-gap);
+      font-size: var(--sl-text-h4);
+      font-weight: 600;
+      color: var(--sl-color-text-accent);
+      text-decoration: none;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .site-title span { overflow: hidden; }
+    .site-title img {
+      height: calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y));
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      object-position: 0 50%;
+    }
+  }
   .topnav { display: flex; gap: 1.1rem; margin-left: 1.5rem; white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
   .topnav a { font: 500 .9rem var(--sl-font); color: var(--sl-color-gray-2); text-decoration: none; padding: .2rem 0; border-bottom: 2px solid transparent; }
   .topnav a:hover { color: var(--sl-color-white); }
